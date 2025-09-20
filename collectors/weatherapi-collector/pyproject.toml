@@ -4,12 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
-    { name = "redjax", email = "5534031+redjax@users.noreply.github.com" }
+    { name = "redjax", email = "5534031+redjax@users.noreply.github.com" },
 ]
 requires-python = ">=3.12"
-dependencies = [
-    "shared",
-]
+dependencies = ["shared"]
 
 [project.scripts]
 weatherapi-collector = "weatherapi_collector:main"
@@ -19,4 +17,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-shared = { path = "../../shared" }
+shared = { workspace = true }
