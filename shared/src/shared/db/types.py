@@ -1,8 +1,11 @@
-from sqlalchemy.types import TypeDecorator, TEXT
-from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
-from sqlalchemy.dialects.mysql import JSON as MYSQL_JSON
-from sqlalchemy.dialects.sqlite import TEXT as SQLITE_TEXT
+from __future__ import annotations
+
 import json
+
+from sqlalchemy.dialects.mysql import JSON as MYSQL_JSON
+from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
+from sqlalchemy.dialects.sqlite import TEXT as SQLITE_TEXT
+from sqlalchemy.types import TEXT, TypeDecorator
 
 __all__ = ["StrList"]
 

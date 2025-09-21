@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from dynaconf import Dynaconf
-
 
 __all__ = ["SHARED_SETTINGS", "SHARED_CONFIG_DIR"]
 

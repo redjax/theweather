@@ -1,17 +1,17 @@
 from __future__ import annotations
 
+import datetime as dt
 from decimal import Decimal
 import typing as t
-import datetime as dt
 
 from shared.db import Base, annotated
 from shared.domain.weatherapi.location import WeatherAPILocationModel
+
 from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
 from sqlalchemy.types import JSON
-
 
 __all__ = [
     "CurrentWeatherModel",

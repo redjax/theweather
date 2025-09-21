@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import time
 
-from weatherapi_collector.convert import weather_forecast_dict_to_schema
+# from depends import db_depends
+from shared import http_lib
 
 # from weatherapi_collector.db_client.forecast import save_forecast
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
+from weatherapi_collector.convert import weather_forecast_dict_to_schema
 
 from . import requests
 
-# from depends import db_depends
-from shared import http_lib
 import httpx
 from loguru import logger as log
 import sqlalchemy as sa

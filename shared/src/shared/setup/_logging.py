@@ -1,8 +1,12 @@
-import sys
-from loguru import logger
-from typing import Optional
-from shared.config import SHARED_SETTINGS
+from __future__ import annotations
+
 from pathlib import Path
+import sys
+from typing import Optional
+
+from shared.config import SHARED_SETTINGS
+
+from loguru import logger
 
 __all__ = ["setup_loguru_logging"]
 

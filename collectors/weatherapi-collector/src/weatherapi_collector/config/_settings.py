@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from shared.config import SHARED_CONFIG_DIR
 
 from dynaconf import Dynaconf
-
 
 __all__ = [
     "WEATHERAPI_SETTINGS",

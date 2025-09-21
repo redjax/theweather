@@ -1,2 +1,3 @@
-from . import location
-from . import weather
+from __future__ import annotations
+
+from . import location, weather

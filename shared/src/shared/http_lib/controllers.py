@@ -340,8 +340,7 @@ class HttpxController(AbstractContextManager):
         return client
 
     def send_request(self, request: httpx.Request) -> httpx.Response:
-        """
-        Send an httpx.Request either using an existing client (inside 'with' block),
+        """Send an httpx.Request either using an existing client (inside 'with' block),
         or by creating a temporary client (outside 'with').
 
         Params:
@@ -349,6 +348,7 @@ class HttpxController(AbstractContextManager):
 
         Returns:
             httpx.Response: The HTTP response.
+
         """
         if self.client is None:
             ## Not inside 'with' context: create client temporarily

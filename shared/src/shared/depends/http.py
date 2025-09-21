@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from shared.http_lib import HttpxController
 from shared.http_lib.config import HTTP_SETTINGS
 

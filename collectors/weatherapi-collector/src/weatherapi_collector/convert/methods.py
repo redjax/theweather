@@ -1,20 +1,21 @@
 from __future__ import annotations
 
-import typing as t
 import json
+import typing as t
 
+from loguru import logger as log
 from shared.domain.weatherapi.location import (
     LocationIn,
-    WeatherAPILocationModel,
     LocationOut,
+    WeatherAPILocationModel,
 )
 from shared.domain.weatherapi.weather.current import (
     CurrentWeatherIn,
+    CurrentWeatherJSONIn,
+    CurrentWeatherJSONModel,
+    CurrentWeatherJSONOut,
     CurrentWeatherModel,
     CurrentWeatherOut,
-    CurrentWeatherJSONIn,
-    CurrentWeatherJSONOut,
-    CurrentWeatherJSONModel,
 )
 from shared.domain.weatherapi.weather.forecast import (
     ForecastJSONIn,
@@ -22,7 +23,6 @@ from shared.domain.weatherapi.weather.forecast import (
     ForecastJSONOut,
     ForecastJSONRepository,
 )
-from loguru import logger as log
 
 __all__ = [
     "current_weather_dict_to_schema",
@@ -101,7 +101,6 @@ def current_weather_schema_to_model(
         CurrentWeatherModel: The converted database model.
 
     """
-
     raise NotImplementedError(
         "Converting current weather schema to model not yet implemented"
     )

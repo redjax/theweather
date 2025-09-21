@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import datetime as dt
 from decimal import Decimal
 import typing as t
-import datetime as dt
 
 from loguru import logger as log
 from pydantic import (

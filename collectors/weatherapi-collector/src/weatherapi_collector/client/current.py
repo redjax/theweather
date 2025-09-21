@@ -2,6 +2,13 @@ from __future__ import annotations
 
 import time
 
+from shared import http_lib
+
+# from weatherapi_collector.db_client.current_weather import (
+#     save_current_weather,
+#     save_current_weather_response
+# )
+from weatherapi_collector.config import WEATHERAPI_SETTINGS
 from weatherapi_collector.constants import WEATHERAPI_BASE_URL
 from weatherapi_collector.convert.methods import (
     current_weather_dict_to_schema,
@@ -9,16 +16,9 @@ from weatherapi_collector.convert.methods import (
     location_dict_to_schema,
 )
 
-# from weatherapi_collector.db_client.current_weather import (
-#     save_current_weather,
-#     save_current_weather_response
-# )
-from weatherapi_collector.config import WEATHERAPI_SETTINGS
-
 from . import requests
 
 import hishel
-from shared import http_lib
 import httpx
 from loguru import logger as log
 import sqlalchemy as sa

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from shared import http_lib
 from weatherapi_collector.constants import WEATHERAPI_BASE_URL
 
-from shared import http_lib
 import httpx
 from loguru import logger as log
 

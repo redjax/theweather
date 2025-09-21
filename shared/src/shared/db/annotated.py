@@ -10,10 +10,10 @@ Examples:
 from __future__ import annotations
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
 import sqlalchemy.orm as so
 from typing_extensions import Annotated
-from sqlalchemy.ext.mutable import MutableDict
-from sqlalchemy.dialects.postgresql import JSONB
 
 __all__ = ["INT_PK", "STR_10", "STR_255", "PG_MUT_JSONB"]
 
