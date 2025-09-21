@@ -1,9 +1,11 @@
-from pathlib import Path
+from __future__ import annotations
+
+from contextlib import contextmanager
 import importlib.util
 import logging
-import platform
-from contextlib import contextmanager
 import os
+from pathlib import Path
+import platform
 import typing as t
 
 import nox
@@ -106,7 +108,10 @@ def run_linter(session: nox.Session):
     ## Collect workspace member directories:
     #  This will match your uv workspace globs
     members = (
-        list(root.glob("collectors/*")) + [root / "shared"] + [root / "api-server"]
+        list(root.glob("collectors/*"))
+        + [root / "shared"]
+        + [root / "api-server"]
+        + [root / "scripts"]
     )
 
     session.install("ruff")
@@ -125,3 +130,12 @@ def run_linter(session: nox.Session):
             "--fix",
             external=True,
         )
+
+    ## Lint noxfile
+    session.run(
+        "ruff",
+        "check",
+        "noxfile.py",
+        "--fix",
+        external=True,
+    )
