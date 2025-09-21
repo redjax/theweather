@@ -4,16 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "shared",
-    "weatherapi-collector",
-]
+dependencies = ["shared", "weatherapi-collector"]
 
 [dependency-groups]
-dev = [
-    "nox>=2025.5.1",
-    "ruff>=0.13.1",
-]
+dev = ["nox>=2025.5.1", "ruff>=0.13.1"]
 
 [tool.uv.workspace]
 members = [
@@ -29,6 +23,11 @@ weatherapi-collector = { workspace = true }
 [tool.hatch.build.targets.wheel]
 packages = []
 
+## Vulture config
+[tool.vulture]
+exclude = ["*/.venv/*", "*/__pycache__/*"]
+
+## Ruff config
 [tool.ruff]
 target-version = "py311"
 line-length = 88

@@ -139,3 +139,34 @@ def run_linter(session: nox.Session):
         "--fix",
         external=True,
     )
+
+
+@nox.session(python=[DEFAULT_PYTHON], name="vulture-check", tags=["quality"])
+def run_vulture_check(session: nox.Session):
+    # exclude_patterns = "*.venv,*/.venv/*,*/__pycache__/*"
+
+    session.install(f"vulture")
+
+    log.info("Checking for dead code with vulture")
+
+    ## shared/
+    session.run("vulture", "shared/", "--min-confidence", "100")
+
+    ## collectors/openmeteo-collector/
+    session.run("vulture", "collectors/openmeteo-collector/", "--min-confidence", "100")
+
+    ## collectors/weatherapi-collector/
+    session.run(
+        "vulture", "collectors/weatherapi-collector/", "--min-confidence", "100"
+    )
+
+    ## api-server/
+    session.run("vulture", "api-server/", "--min-confidence", "100")
+
+    ## noxfile.py
+    session.run("vulture", "noxfile.py", "--min-confidence", "100")
+
+    ## scripts/
+    session.run("vulture", "scripts/", "--min-confidence", "100")
+
+    log.info("Finished checking for dead code with vulture")
