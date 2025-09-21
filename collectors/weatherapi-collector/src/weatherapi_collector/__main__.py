@@ -71,7 +71,7 @@ def main(start_scheduled: bool = False):
 if __name__ == "__main__":
     setup_loguru_logging()
 
-    RUN_SCHEDULE: bool = True
+    RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER", False)
 
     try:
         main(start_scheduled=RUN_SCHEDULE)
