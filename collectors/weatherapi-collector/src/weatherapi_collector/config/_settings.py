@@ -10,8 +10,10 @@ __all__ = [
 ]
 
 
+## Set path to this directory
 THIS_DIR: Path = Path(__file__).parent
 
+## Set path to local config directory
 WEATHERAPI_COLLECTOR_CONFIG_DIR: Path = THIS_DIR.parents[2] / "config"
 
 SETTINGS = Dynaconf(
@@ -22,5 +24,9 @@ SETTINGS = Dynaconf(
         str(SHARED_CONFIG_DIR / ".secrets.toml"),
         str(WEATHERAPI_COLLECTOR_CONFIG_DIR / "settings.toml"),
         str(WEATHERAPI_COLLECTOR_CONFIG_DIR / ".secrets.toml"),
+        "config/settings.toml",
+        "config/.secrets.toml",
+        "settings.toml",
+        ".secrets.toml",
     ],
 )

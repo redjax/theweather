@@ -26,12 +26,14 @@ class CurrentWeatherJSONModel(Base):
 
     id: so.Mapped[annotated.INT_PK]
 
+    ## Automatically created when model is created in the database
     created_at: so.Mapped[dt.datetime] = so.mapped_column(
         sa.DateTime(timezone=True),
         default=dt.datetime.now,
         nullable=False,
     )
 
+    ## Raw JSON from a WeatherAPI HTTP request
     current_weather_json: so.Mapped[dict] = so.mapped_column(JSON)
 
 
@@ -133,12 +135,14 @@ class CurrentWeatherModel(Base):
         back_populates="weather"
     )
 
-    # ForeignKey to WeatherAPILocationModel
+    ## Foreign keys
+
+    ## Relationship back to WeatherAPILocationModel
     location_id: so.Mapped[int] = so.mapped_column(
         sa.ForeignKey("weatherapi_location.id")
     )
 
-    # Relationship back to WeatherAPILocationModel using a string reference
+    ## Relationship back to WeatherAPILocationModel using a string reference
     location: so.Mapped[WeatherAPILocationModel] = so.relationship(
         WeatherAPILocationModel, back_populates="current_weather_entries"
     )
@@ -171,9 +175,14 @@ class CurrentWeatherConditionModel(Base):
     icon: so.Mapped[str] = so.mapped_column(sa.TEXT)
     code: so.Mapped[int] = so.mapped_column(sa.NUMERIC)
 
+    ## Foreign keys
+
+    ## Relationship back to CurrentWeatherModel
     weather_id: so.Mapped[int] = so.mapped_column(
         sa.ForeignKey("weatherapi_current_weather.id")
     )
+
+    ## Relationship back to CurrentWeatherModel
     weather: so.Mapped["CurrentWeatherModel"] = so.relationship(
         back_populates="condition"
     )
@@ -216,9 +225,14 @@ class CurrentWeatherAirQualityModel(Base):
     us_epa_index: so.Mapped[int] = so.mapped_column(sa.NUMERIC)
     gb_defra_index: so.Mapped[int] = so.mapped_column(sa.NUMERIC)
 
+    ## Foreign keys
+
+    ## Relationship back to CurrentWeatherModel
     weather_id: so.Mapped[int] = so.mapped_column(
         sa.ForeignKey("weatherapi_current_weather.id")
     )
+
+    ## Relationship back to CurrentWeatherModel
     weather: so.Mapped["CurrentWeatherModel"] = so.relationship(
         back_populates="air_quality"
     )

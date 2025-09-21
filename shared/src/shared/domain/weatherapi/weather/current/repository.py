@@ -62,17 +62,20 @@ class CurrentWeatherRepository(BaseRepository[CurrentWeatherModel]):
             Exception: If there is an error creating the related models.
 
         """
+        ## Create weather model objects
         weather = CurrentWeatherModel(**weather_data)
         condition = CurrentWeatherConditionModel(**condition_data)
         air_quality = CurrentWeatherAirQualityModel(**air_quality_data)
 
-        # Associate the related models with the main weather model
+        ## Associate the related models with the main weather model
         weather.condition = condition
         weather.air_quality = air_quality
 
-        # Add and commit all models in one transaction
+        ## Add and commit all models in one transaction
         self.session.add(weather)
         self.session.commit()
+
+        ## Refresh with data from saving to database before returning
         self.session.refresh(weather)
 
         return weather
@@ -102,14 +105,14 @@ class CurrentWeatherRepository(BaseRepository[CurrentWeatherModel]):
             Exception: If there is an error updating the related models.
 
         """
-        # Update main weather model
+        ## Update main weather model
         self.update(weather, weather_data)
 
-        # Update condition if provided
+        ## Update condition if provided
         if condition_data and weather.condition:
             self.update(weather.condition, condition_data)
 
-        # Update air quality if provided
+        ## Update air quality if provided
         if air_quality_data and weather.air_quality:
             self.update(weather.air_quality, air_quality_data)
 
@@ -198,6 +201,7 @@ class CurrentWeatherRepository(BaseRepository[CurrentWeatherModel]):
 
         """
         try:
+            ## Get weather with related models
             _weather: CurrentWeatherModel = (
                 self.session.query(CurrentWeatherModel)
                 .options(

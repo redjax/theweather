@@ -20,6 +20,7 @@ class ForecastJSONModel(Base):
 
     id: so.Mapped[annotated.INT_PK]
 
+    ## Automatically generate timestamp on creation
     created_at: so.Mapped[dt.datetime] = so.mapped_column(
         sa.DateTime(timezone=True),
         default=dt.datetime.now,

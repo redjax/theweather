@@ -128,14 +128,17 @@ class LocationRepository(BaseRepository[WeatherAPILocationModel]):
             )
         )
 
+        ## If location already exists, return from database
         if existing_location:
             log.info(
                 f"Location already exists: {location.name}, {location.region}, {location.country}. Returning from database."
             )
+
             return self.get_by_name_country_and_region(
                 location.name, location.region, location.country
             )
 
+        ## If location does not exist, save to database
         try:
             self.session.add(location)
             self.session.commit()

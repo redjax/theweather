@@ -15,7 +15,7 @@ __all__ = [
 
 
 class WeatherAPILocationModel(Base):
-    """Location Model.
+    """WeatherAPI Location Model.
 
     Attributes:
         id (int): The ID of the location record.
