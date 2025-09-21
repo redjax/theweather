@@ -18,5 +18,5 @@ SHARED_SETTINGS: Dynaconf = Dynaconf(
         ".secrets.toml",
         "config/settings.toml",
         "config/.secrets.toml",
-    ]
+    ],
 )

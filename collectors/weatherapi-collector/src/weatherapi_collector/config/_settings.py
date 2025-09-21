@@ -6,7 +6,7 @@ from dynaconf import Dynaconf
 
 
 __all__ = [
-    "SETTINGS",
+    "WEATHERAPI_SETTINGS",
 ]
 
 
@@ -30,3 +30,5 @@ SETTINGS = Dynaconf(
         ".secrets.toml",
     ],
 )
+
+WEATHERAPI_SETTINGS = SETTINGS.get("weatherapi", {})

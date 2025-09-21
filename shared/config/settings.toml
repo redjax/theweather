@@ -3,6 +3,12 @@ tz = "Etc/UTC"
 [logging]
 log_level = "INFO"
 
+[http]
+http_cache_type = "sqlite"
+http_cache_file_dir = ".cache/http/hishel"
+http_cache_db_file = ".cache/http/hishel.sqlite3"
+http_cache_check_ttl_every = 60
+
 [database]
 ## SQLite
 # db_type = "sqlite"
