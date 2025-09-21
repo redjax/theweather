@@ -1,2 +1,3 @@
-def main() -> None:
-    print("Hello from weatherapi-collector!")
+from .config import WEATHERAPI_SETTINGS
+
+from .constants import WEATHERAPI_BASE_URL

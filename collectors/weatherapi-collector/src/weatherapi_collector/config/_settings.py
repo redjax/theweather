@@ -24,12 +24,12 @@ SETTINGS = Dynaconf(
         ## Shared config first, so local overwrites it
         str(SHARED_CONFIG_DIR / "settings.toml"),
         str(SHARED_CONFIG_DIR / ".secrets.toml"),
-        str(WEATHERAPI_COLLECTOR_CONFIG_DIR / "settings.toml"),
-        str(WEATHERAPI_COLLECTOR_CONFIG_DIR / ".secrets.toml"),
         "config/settings.toml",
         "config/.secrets.toml",
         "settings.toml",
         ".secrets.toml",
+        str(WEATHERAPI_COLLECTOR_CONFIG_DIR / "settings.toml"),
+        str(WEATHERAPI_COLLECTOR_CONFIG_DIR / ".secrets.toml"),
     ],
 )
 

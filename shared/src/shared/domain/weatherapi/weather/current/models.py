@@ -5,7 +5,7 @@ import typing as t
 import datetime as dt
 
 from shared.db import Base, annotated
-from domain.weatherapi.location import WeatherAPILocationModel
+from shared.domain.weatherapi.location import WeatherAPILocationModel
 from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
