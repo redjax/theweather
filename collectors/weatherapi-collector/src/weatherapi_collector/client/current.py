@@ -68,6 +68,9 @@ def get_current_weather(
     if api_key is None or api_key == "":
         raise ValueError("WeatherAPI key is None or empty.")
 
+    if not location or location == "":
+        raise ValueError("Location name is required")
+
     current_weather_request: httpx.Request = requests.return_current_weather_request(
         api_key=api_key, location=location, include_aqi=include_aqi, headers=headers
     )

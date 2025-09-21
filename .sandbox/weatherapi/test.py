@@ -26,6 +26,8 @@ log.info(f"\nShared settings: {SHARED_SETTINGS.as_dict()}")
 log.info(f"\nWeatherAPI collector settings: {WEATHERAPI_SETTINGS}")
 log.info(f"\nHTTP settings: {HTTP_SETTINGS}")
 
+input("PAUSE")
+
 http_controller = get_httpx_controller()
 
 log.info(f"HTTP controller: {http_controller.__dict__}")
