@@ -170,3 +170,36 @@ def run_vulture_check(session: nox.Session):
     session.run("vulture", "scripts/", "--min-confidence", "100")
 
     log.info("Finished checking for dead code with vulture")
+
+
+@nox.session(name="export-requirements")
+def export_requirements(session: nox.Session):
+    ## List of paths or globs to search for pyproject.toml files
+    app_paths = [
+        "shared",
+        "collectors/*",
+        "api-server",
+    ]
+
+    ## Install uv to run commands
+    session.install("uv")
+
+    for pattern in app_paths:
+        ## Use glob to find matching app directories containing pyproject.toml
+        for app_dir in sorted(Path(".").glob(pattern)):
+            pyproject_file = app_dir / "pyproject.toml"
+
+            if pyproject_file.exists():
+                session.log(f"Exporting requirements for {app_dir}")
+
+                session.run(
+                    "uv",
+                    "pip",
+                    "compile",
+                    str(pyproject_file),
+                    "-o",
+                    str(app_dir / "requirements.txt"),
+                    external=True,
+                )
+            else:
+                session.log(f"No pyproject.toml found in {app_dir}, skipping")
