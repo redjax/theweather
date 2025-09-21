@@ -32,7 +32,6 @@ print(f"HTTP controller: {http_controller.__dict__}")
 
 req = http_lib.build_request("HEAD", "https://www.google.com")
 
-with http_controller as http_ctl:
-    res = http_ctl.client.send(req)
+res = http_controller.send_request(req)
 
 print(f"HTTP response: {res.status_code}: {res.reason_phrase}")
