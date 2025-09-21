@@ -7,7 +7,13 @@ authors = [
     { name = "redjax", email = "5534031+redjax@users.noreply.github.com" },
 ]
 requires-python = ">=3.12"
-dependencies = ["shared"]
+dependencies = [
+    "dynaconf>=3.2.11",
+    "hishel>=0.1.3",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "shared",
+]
 
 [project.scripts]
 weatherapi-collector = "weatherapi_collector:main"

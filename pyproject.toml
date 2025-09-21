@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "shared",
+    "weatherapi-collector",
 ]
 
 [dependency-groups]
@@ -20,6 +21,7 @@ members = [
 
 [tool.uv.sources]
 shared = { workspace = true }
+weatherapi-collector = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = []

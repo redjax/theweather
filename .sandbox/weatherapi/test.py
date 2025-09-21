@@ -7,6 +7,10 @@ shared_src = repo_root / "shared" / "src"
 
 sys.path.insert(0, str(shared_src))
 
+# -----------------------------------------------------
+
 from shared.config import SHARED_SETTINGS
+from weatherapi_collector.config import SETTINGS as WEATHERAPI_COLLECTOR_SETTINGS
 
 print(f"Shared settings: {SHARED_SETTINGS.as_dict()}")
+print(f"WeatherAPI collector settings: {WEATHERAPI_COLLECTOR_SETTINGS.as_dict()}")
