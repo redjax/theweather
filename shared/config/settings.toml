@@ -2,6 +2,7 @@ tz = "Etc/UTC"
 
 [logging]
 log_level = "INFO"
+log_file_path = ".logs/app.log"
 
 [http]
 http_use_cache = false
