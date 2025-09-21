@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "shared",
+]
 
 [dependency-groups]
 dev = ["ruff>=0.13.1"]
@@ -15,6 +17,9 @@ members = [
     "shared",
     # "api-server"
 ]
+
+[tool.uv.sources]
+shared = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = []
