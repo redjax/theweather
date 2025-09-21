@@ -1,2 +1,7 @@
+dynaconf_merge = true
+
 [logging]
 log_level = "INFO"
+
+[weatherapi]
+location_name = "London"

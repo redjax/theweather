@@ -11,6 +11,7 @@ THIS_DIR: Path = Path(__file__).parent
 SHARED_CONFIG_DIR = THIS_DIR.parents[2] / "config"
 
 SHARED_SETTINGS: Dynaconf = Dynaconf(
+    merge_enabled=True,
     settings_files=[
         str(SHARED_CONFIG_DIR / "settings.toml"),
         str(SHARED_CONFIG_DIR / ".secrets.toml"),

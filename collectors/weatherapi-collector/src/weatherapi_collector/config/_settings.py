@@ -18,6 +18,7 @@ WEATHERAPI_COLLECTOR_CONFIG_DIR: Path = THIS_DIR.parents[2] / "config"
 
 ## Create settings object
 SETTINGS = Dynaconf(
+    merge_enabled=True,
     envvar_prefix="WEATHERAPI_COLLECTOR",
     settings_files=[
         ## Shared config first, so local overwrites it

@@ -41,3 +41,6 @@ db_echo = true
 # db_host = "localhost"
 # db_port = 3306
 # db_database = "theweather-dev"
+
+[weatherapi]
+location_name = "London"
