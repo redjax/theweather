@@ -10,7 +10,10 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.13.1"]
+dev = [
+    "nox>=2025.5.1",
+    "ruff>=0.13.1",
+]
 
 [tool.uv.workspace]
 members = [
