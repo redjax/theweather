@@ -16,6 +16,7 @@ THIS_DIR: Path = Path(__file__).parent
 ## Set path to local config directory
 WEATHERAPI_COLLECTOR_CONFIG_DIR: Path = THIS_DIR.parents[2] / "config"
 
+## Create settings object
 SETTINGS = Dynaconf(
     envvar_prefix="WEATHERAPI_COLLECTOR",
     settings_files=[
@@ -31,4 +32,5 @@ SETTINGS = Dynaconf(
     ],
 )
 
+## Extract weatherapi settings from settings object
 WEATHERAPI_SETTINGS = SETTINGS.get("weatherapi", {})
