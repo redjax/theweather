@@ -74,3 +74,10 @@ venv.bak/
 # dynaconf
 settings*.toml
 .secrets*.toml
+
+# sandbox, logs, cache
+.sandbox/
+.logs/
+.cache/
+.nox/
+.ruff_cache/
