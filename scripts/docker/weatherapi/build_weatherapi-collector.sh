@@ -2,72 +2,101 @@
 
 set -euo pipefail
 
-if ! command -v docker compose --version &> /dev/null; then
-    echo "docker compose not installed"
-    exit 1
-fi
-
-THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-REPO_ROOT=$( cd -- "$THIS_DIR/../../.." &> /dev/null && pwd )
-
-SKIP_CACHE="false"
-
-## Store path where script was originally called from
-ORIGINAL_PWD=$(pwd)
-
-## Source vars file
-source "$THIS_DIR/weatherapi_paths"
-
-## Function to switch back to original directory on script exit
-function cleanup() {
-    cd "$ORIGINAL_PWD"
+## Function to check pre-requisites
+check_prereqs() {
+    if ! command -v docker compose --version &> /dev/null; then
+        echo "docker compose not installed"
+        exit 1
+    fi
 }
-trap cleanup EXIT
 
-## Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --skip-cache)
-            SKIP_CACHE="true"
-            shift
-            ;;
-        -h | --help)
-            echo "Usage: $0 [--skip-cache]"
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-    esac
-done
+## Function to get repository root directory
+get_repo_root() {
+    local THIS_DIR
+    THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    cd "$THIS_DIR/../../.." && pwd
+}
 
-## Change working dir to repo root
-cd "$REPO_ROOT"
+## Function to parse arguments
+parse_args() {
+    SKIP_CACHE="false"
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --skip-cache)
+                SKIP_CACHE="true"
+                shift
+                ;;
+            -h|--help)
+                echo "Usage: $0 [--skip-cache]"
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+}
 
-echo "Building weatherapi-collector container"
+## Function to build the weatherapi-collector container
+build_weatherapi_collector() {
+    local repo_root="$1"
+    local skip_cache="$2"
+    local original_pwd
+    ORIGINAL_PWD=$(pwd)
 
-## Build command
-cmd=(docker compose -f "$WEATHERAPI_COLLECTOR_CONTAINER_DIR/compose.yml" build)
-if [[ "$SKIP_CACHE" == "true" ]]; then
-    echo "Skipping cache (build will take longer)"
-    cmd+=(--no-cache)
-fi
+    ## Source paths file relative to script location
+    local script_dir
+    script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    source "$script_dir/weatherapi_paths"
 
-## Preview command
-echo "Running build command:"
-echo "${cmd[@]}"
-echo ""
+    ## Cleanup function to restore cwd
+    cleanup() {
+        cd "$ORIGINAL_PWD"
+    }
+    trap cleanup EXIT
 
-## Execute command
-"${cmd[@]}"
-if [[ $? -ne 0 ]]; then
+    ## Change directory to repo root
+    cd "$repo_root"
+
+    echo "Building weatherapi-collector container"
+
+    local cmd=(docker compose -f "$WEATHERAPI_COLLECTOR_CONTAINER_DIR/compose.yml" build)
+    if [[ "$skip_cache" == "true" ]]; then
+        echo "Skipping cache (build will take longer)"
+        cmd+=(--no-cache)
+    fi
+
+    echo "Running build command:"
+    echo "${cmd[@]}"
     echo ""
-    echo "[ERROR] Failed to build weatherapi-collector container"
-    echo ""
-    exit 1
-else
-    echo ""
-    echo "weatherapi-collector container built successfully"
-    echo ""
+
+    ## Execute command
+    if ! "${cmd[@]}"; then
+        echo ""
+        echo "[ERROR] Failed to build weatherapi-collector container"
+        echo ""
+        exit 1
+    else
+        echo ""
+        echo "weatherapi-collector container built successfully"
+        echo ""
+    fi
+}
+
+## Main function for CLI execution
+main() {
+    check_prereqs
+
+    parse_args "$@"
+
+    local repo_root
+    repo_root=$(get_repo_root)
+
+    build_weatherapi_collector "$repo_root" "$SKIP_CACHE"
+}
+
+## If sourced, don’t run main; if executed directly, run main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
 fi
