@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": "..",
+			"name": "Repository Root"
+		},
+		{
+			"path": "../scripts/",
+			"name": "Repo Scripts"
+		},
+		{
+			"path": "../api-server/",
+			"name": "API Server"
+		},
+		{
+			"path": "../collectors/weatherapi-collector/",
+			"name": "WeatherAPI Collector"
+		},
+		{
+			"path": "../containers/weatherapi-collector/",
+			"name": "WeatherAPI Container"
+		},
+		{
+			"path": "../collectors/openmeteo-collector/",
+			"name": "OpenMeteo Collector"
+		},
+		{
+			"path": "../shared/",
+			"name": "Shared Package"
+		}
+	]
+}
