@@ -1,4 +1,4 @@
-# Base layer: python slim image with build dependencies installed
+## Base layer
 FROM python:3.12-slim AS base
 
 WORKDIR /app
@@ -9,42 +9,42 @@ RUN apt-get update -y && \
 
 RUN pip install --upgrade pip
 
-
-# Build layer: install dependencies for shared and weatherapi-collector
-FROM base AS build
+## Build layer: shared package
+FROM base AS build-shared
 
 WORKDIR /app
 
-# Copy shared source and requirements first
 COPY shared/ ./shared/
 COPY shared/requirements.txt ./shared/requirements.txt
 
-# Install shared package (editable) so it is available for weatherapi-collector
+## Install shared package in container environment
 RUN pip install -e ./shared
 
-# Copy weatherapi-collector requirements next
+## Build layer: weatherapi-collector package
+FROM build-shared AS build-weatherapi
+
+WORKDIR /app
+
 COPY collectors/weatherapi-collector/requirements.txt ./collectors/weatherapi-collector/requirements.txt
 
-# Install weatherapi-collector dependencies (which references shared)
+## Install weatherapi-collector package in container environment
 RUN pip install -r ./collectors/weatherapi-collector/requirements.txt
-
-# Copy weatherapi-collector source last
 COPY collectors/weatherapi-collector/src/ ./collectors/weatherapi-collector/src/
 
-
-# Run layer: final slim image with only runtime and your packages
+## Runtime layer
 FROM python:3.12-slim AS run
 
 WORKDIR /app
 
-# Copy installed packages from build layer
-COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=build /usr/local/bin /usr/local/bin
+## Copy Python site-packages & bins from build layer
+COPY --from=build-weatherapi /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=build-weatherapi /usr/local/bin /usr/local/bin
 
-# Copy application source for runtime
+## Copy source dirs for packages
 COPY shared/src/ ./shared/src/
 COPY collectors/weatherapi-collector/src/ ./collectors/weatherapi-collector/src/
 
+## Add build apps to path
 ENV PYTHONPATH=/app/shared/src:/app/collectors/weatherapi-collector/src
 
 CMD ["python3", "-m", "weatherapi_collector"]
