@@ -48,7 +48,7 @@ def collect(location_name: str | None = None, forecast_days: int = 1) -> dict:
     return {"current_weather": current_weather, "weather_forecast": weather_forecast}
 
 
-def main(start_scheduled: bool = False):
+def main(start_scheduled: bool = False, save_to_db: bool = False):
     location_name: str = WEATHERAPI_SETTINGS.get("LOCATION_NAME")
     forecast_days: int = 1
 
@@ -57,6 +57,7 @@ def main(start_scheduled: bool = False):
             location_name=location_name,
             api_key=WEATHERAPI_SETTINGS.get("API_KEY"),
             forecast_days=forecast_days,
+            save_to_db=save_to_db,
         )
 
     else:
@@ -72,9 +73,10 @@ if __name__ == "__main__":
     setup_loguru_logging()
 
     RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER", False)
+    SAVE_TO_DB: bool = WEATHERAPI_SETTINGS.get("SAVE_TO_DB", False)
 
     try:
-        main(start_scheduled=RUN_SCHEDULE)
+        main(start_scheduled=RUN_SCHEDULE, save_to_db=SAVE_TO_DB)
     except Exception as exc:
         log.error(f"({type(exc)}) Failed to run WeatherAPI collector: {exc}")
         exit(1)

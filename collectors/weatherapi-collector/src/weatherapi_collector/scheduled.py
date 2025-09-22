@@ -8,13 +8,15 @@ from loguru import logger as log
 __all__ = ["start_weatherapi_scheduled_collection", "add_weatherapi_schedules"]
 
 
-def job_weatherapi_current_weather(location_name: str, api_key: str):
+def job_weatherapi_current_weather(
+    location_name: str, api_key: str, save_to_db: bool = False
+):
     log.info(
         f"[Scheduled Job] Collect current weather for location '{location_name}' from WeatherAPI"
     )
     try:
         result = weatherapi_client.get_current_weather(
-            location=location_name, api_key=api_key
+            location=location_name, api_key=api_key, save_to_db=save_to_db
         )
         log.info(f"Collected current weather for location '{location_name}'")
     except Exception as exc:
@@ -25,7 +27,7 @@ def job_weatherapi_current_weather(location_name: str, api_key: str):
 
 
 def job_weatherapi_weather_forecast(
-    location_name: str, api_key: str, forecast_days: int = 1
+    location_name: str, api_key: str, forecast_days: int = 1, save_to_db: bool = False
 ):
     log.info(
         f"[Scheduled Job] Collect weather forecast for location '{location_name}' from WeatherAPI"
@@ -36,6 +38,7 @@ def job_weatherapi_weather_forecast(
             location=location_name,
             api_key=api_key,
             days=forecast_days,
+            save_to_db=save_to_db,
         )
         log.info(f"Collected weather forecast for location '{location_name}'")
     except Exception as exc:
@@ -45,9 +48,7 @@ def job_weatherapi_weather_forecast(
 
 
 def add_weatherapi_schedules(
-    location_name: str,
-    api_key: str,
-    forecast_days: int = 1,
+    location_name: str, api_key: str, forecast_days: int = 1, save_to_db: bool = False
 ):
     for minute in ["00", "15", "30", "45"]:
         ## Current weather
@@ -61,18 +62,18 @@ def add_weatherapi_schedules(
             location_name=location_name,
             api_key=api_key,
             forecast_days=forecast_days,
+            save_to_db=save_to_db,
         )
 
 
 def start_weatherapi_scheduled_collection(
-    location_name: str,
-    api_key: str,
-    forecast_days: int = 1,
+    location_name: str, api_key: str, forecast_days: int = 1, save_to_db: bool = False
 ):
     add_weatherapi_schedules(
         location_name=location_name,
         api_key=api_key,
         forecast_days=forecast_days,
+        save_to_db=save_to_db,
     )
 
     log.info(f"Starting scheduler loop [interval: HH:00, HH:15, HH:30, HH:45]")

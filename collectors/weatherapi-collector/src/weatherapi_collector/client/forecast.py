@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import time
 
-# from depends import db_depends
+from weatherapi_collector.depends import db_depends
 from shared import http_lib
 
-# from weatherapi_collector.db_client.forecast import save_forecast
+from weatherapi_collector.db_client.forecast import save_forecast
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
 from weatherapi_collector.convert import weather_forecast_dict_to_schema
 
@@ -126,43 +126,43 @@ def get_weather_forecast(
 
         return None
 
-    # if save_to_db:
-    #     if not db_engine:
-    #         db_engine = db_depends.get_db_engine()
+    if save_to_db:
+        if not db_engine:
+            db_engine = db_depends.get_db_engine()
 
-    #     errored: bool = False
+        errored: bool = False
 
-    #     try:
-    #         db_forecast_json = weather_forecast_dict_to_schema(
-    #             weather_forecast_dict=decoded
-    #         )
-    #     except Exception as exc:
-    #         msg = f"({type(exc)}) Error converting weather forecast to schema. Details: {exc}"
-    #         log.error(msg)
+        try:
+            db_forecast_json = weather_forecast_dict_to_schema(
+                weather_forecast_dict=decoded
+            )
+        except Exception as exc:
+            msg = f"({type(exc)}) Error converting weather forecast to schema. Details: {exc}"
+            log.error(msg)
 
-    #         errored = True
+            errored = True
 
-    #     if not errored:
-    #         try:
-    #             save_forecast(
-    #                 forecast_schema=db_forecast_json, engine=db_engine, echo=db_echo
-    #             )
-    #         except Exception as exc:
-    #             msg = f"({type(exc)}) Error saving weather forecast to database. Details: {exc}"
-    #             log.error(msg)
+        if not errored:
+            try:
+                save_forecast(
+                    forecast_schema=db_forecast_json, engine=db_engine, echo=db_echo
+                )
+            except Exception as exc:
+                msg = f"({type(exc)}) Error saving weather forecast to database. Details: {exc}"
+                log.error(msg)
 
-    #             errored = True
+                errored = True
 
-    #     if errored:
-    #         log.warning("Errored while saving weather forecast to database.")
+        if errored:
+            log.warning("Errored while saving weather forecast to database.")
 
-    # # log.debug(f"Decoded: {decoded}")
+    # log.debug(f"Decoded: {decoded}")
 
-    # # location_schema: LocationIn = LocationIn.model_validate(decoded["location"])
-    # # forecast_schema = ForecastJSONIn(forecast_json=decoded)
+    # location_schema: LocationIn = LocationIn.model_validate(decoded["location"])
+    # forecast_schema = ForecastJSONIn(forecast_json=decoded)
 
-    # # api_response = APIResponseForecastWeather(
-    # #     forecast=forecast_schema, location=location_schema
-    # # )
+    # api_response = APIResponseForecastWeather(
+    #     forecast=forecast_schema, location=location_schema
+    # )
 
     return decoded
