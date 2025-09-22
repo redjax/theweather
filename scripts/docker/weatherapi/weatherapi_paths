@@ -1,0 +1,5 @@
+THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+REPO_ROOT=$( cd -- "$THIS_DIR/../../.." &> /dev/null && pwd )
+
+export CONTAINERS_DIR="$REPO_ROOT/containers"
+export WEATHERAPI_COLLECTOR_CONTAINER_DIR="$CONTAINERS_DIR/weatherapi-collector"
