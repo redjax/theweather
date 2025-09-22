@@ -9,6 +9,10 @@
 			"name": "Repo Scripts"
 		},
 		{
+			"path": "../.sandbox",
+			"name": "Sandbox"
+		},
+		{
 			"path": "../api-server/",
 			"name": "API Server"
 		},
