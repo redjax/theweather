@@ -19,7 +19,7 @@ ORIGINAL_PWD=$(pwd)
 source "$THIS_DIR/weatherapi_paths"
 
 ## Function to switch back to original directory on script exit
-function cleanup {
+function cleanup() {
     cd "$ORIGINAL_PWD"
 }
 trap cleanup EXIT
@@ -50,7 +50,7 @@ echo "Building weatherapi-collector container"
 ## Build command
 cmd=(docker compose -f "$WEATHERAPI_COLLECTOR_CONTAINER_DIR/compose.yml" build)
 if [[ "$SKIP_CACHE" == "true" ]]; then
-    echo "Skipping cache build will take longer)"
+    echo "Skipping cache (build will take longer)"
     cmd+=(--no-cache)
 fi
 
