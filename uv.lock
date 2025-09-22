@@ -553,7 +553,6 @@ dependencies = [
     { name = "httpx" },
     { name = "loguru" },
     { name = "schedule" },
-    { name = "shared" },
 ]
 
 [package.metadata]
@@ -563,7 +562,6 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "schedule", specifier = ">=1.2.2" },
-    { name = "shared", editable = "shared" },
 ]
 
 [[package]]

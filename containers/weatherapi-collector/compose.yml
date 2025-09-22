@@ -1,0 +1,21 @@
+---
+services:
+  weatherapi-collector:
+    restart: unless-stopped
+    build:
+      ## Set context to repo root
+      context: ../..
+      dockerfile: containers/weatherapi-collector/Dockerfile
+    working_dir: /app
+    container_name: weatherapi-collector
+    command: ["python3", "-m", "weatherapi_collector"]
+    environment:
+      PYTHONPATH: /app/shared/src:/app/collectors/weatherapi-collector/src
+      DYNACONF_WEATHERAPI__API_KEY: ${WEATHERAPI_KEY}
+      DYNACONF_WEATHERAPI__LOCATION_NAME: ${WEATHERAPI_LOCATION_NAME}
+      DYNACONF_LOGGING__LOG_LEVEL: ${WEATHERAPI_COLLECTOR_LOG_LEVEL:-INFO}
+      DYNACONF_LOGGING__LOG_FILE_PATH: ${WEATHERAPI_COLLECTOR_LOG_FILE_PATH:-/app/logs/weatherapi-collector.log}
+      DYNACONF_WEATHERAPI__RUN_SCHEDULER: ${WEATHERAPI_COLLECTOR_RUN_SCHEDULER:-true}
+    volumes:
+      - ../../shared/src:/app/shared/src:ro
+      - ../../collectors/weatherapi-collector/src:/app/collectors/weatherapi-collector/src:ro

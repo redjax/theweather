@@ -13,7 +13,6 @@ dependencies = [
     "httpx>=0.28.1",
     "loguru>=0.7.3",
     "schedule>=1.2.2",
-    "shared",
 ]
 
 [project.scripts]
@@ -25,3 +24,9 @@ build-backend = "hatchling.build"
 
 [tool.uv.sources]
 shared = { workspace = true }
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
