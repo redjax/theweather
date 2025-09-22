@@ -6,9 +6,7 @@ from shared.config import SHARED_CONFIG_DIR
 
 from dynaconf import Dynaconf
 
-__all__ = [
-    "WEATHERAPI_SETTINGS",
-]
+__all__ = ["WEATHERAPI_SETTINGS", "DB_SETTINGS"]
 
 
 ## Set path to this directory
@@ -36,3 +34,6 @@ SETTINGS = Dynaconf(
 
 ## Extract weatherapi settings from settings object
 WEATHERAPI_SETTINGS = SETTINGS.get("weatherapi", {})
+
+## Extract database settings from settings object
+DB_SETTINGS = SETTINGS.get("database", {})

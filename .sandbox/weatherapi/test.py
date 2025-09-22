@@ -7,7 +7,10 @@ from shared.depends import get_httpx_controller
 from shared import http_lib
 from shared.setup import setup_loguru_logging
 
-from weatherapi_collector.config import WEATHERAPI_SETTINGS
+from weatherapi_collector.config import (
+    WEATHERAPI_SETTINGS,
+    DB_SETTINGS as WEATHERAPI_COLLECTOR_DB_SETTINGS,
+)
 from weatherapi_collector import client as weatherapi_client
 
 from loguru import logger as log
@@ -24,6 +27,7 @@ setup_loguru_logging()
 
 log.info(f"\nShared settings: {SHARED_SETTINGS.as_dict()}")
 log.info(f"\nWeatherAPI collector settings: {WEATHERAPI_SETTINGS}")
+log.info(f"\nWeatherAPI collector DB settings: {WEATHERAPI_COLLECTOR_DB_SETTINGS}")
 log.info(f"\nHTTP settings: {HTTP_SETTINGS}")
 
 input("PAUSE")
