@@ -1,7 +1,7 @@
 from pathlib import Path
 from shared.db import Base, create_base_metadata
-
-from shared.db import create_base_metadata
+from shared.domain.weatherapi.location import LocationJSONModel
+from shared.domain.weatherapi.weather import ForecastJSONModel, CurrentWeatherJSONModel
 
 from weatherapi_collector.depends.db_depends import get_db_engine
 from weatherapi_collector.config import DB_SETTINGS
@@ -27,9 +27,14 @@ def initialize_database():
 
     engine = get_db_engine()
 
+    tables_to_create = [
+        ForecastJSONModel.__table__,
+        CurrentWeatherJSONModel.__table__,
+    ]
+
     log.info(f"Initializing database at {engine.url}")
     try:
-        create_base_metadata(base=Base, engine=engine)
+        create_base_metadata(base=Base, engine=engine, tables=tables_to_create)
         log.info(f"Database initialized")
     except Exception as e:
         log.error(f"Failed to initialize database: {e}")
