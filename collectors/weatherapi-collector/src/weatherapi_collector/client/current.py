@@ -4,10 +4,11 @@ import time
 
 from shared import http_lib
 
-# from weatherapi_collector.db_client.current_weather import (
-#     save_current_weather,
-#     save_current_weather_response
-# )
+from weatherapi_collector.depends import db_depends
+from weatherapi_collector.db_client.current_weather import (
+    save_current_weather,
+    save_current_weather_response,
+)
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
 from weatherapi_collector.constants import WEATHERAPI_BASE_URL
 from weatherapi_collector.convert.methods import (
@@ -129,83 +130,83 @@ def get_current_weather(
 
         return None
 
-    # if save_to_db:
-    #     if not db_engine:
-    #         db_engine = db_depends.get_db_engine()
+    if save_to_db:
+        if not db_engine:
+            db_engine = db_depends.get_db_engine()
 
-    #     # log.warning("Saving current weather to database is not implemented")
-    #     errored: bool = False
+        # log.warning("Saving current weather to database is not implemented")
+        errored: bool = False
 
-    #     ## Save current weather JSON response to database
-    #     try:
-    #         db_current_weather_json = current_weather_response_dict_to_schema(
-    #             current_weather_response_dict=decoded
-    #         )
-    #     except Exception as exc:
-    #         msg = f"({type(exc)}) Error converting current weather response to schema. Details: {exc}"
-    #         log.error(msg)
+        ## Save current weather JSON response to database
+        try:
+            db_current_weather_json = current_weather_response_dict_to_schema(
+                current_weather_response_dict=decoded
+            )
+        except Exception as exc:
+            msg = f"({type(exc)}) Error converting current weather response to schema. Details: {exc}"
+            log.error(msg)
 
-    #         errored = True
+            errored = True
 
-    #     if not errored:
-    #         try:
-    #             save_current_weather_response(
-    #                 current_weather_schema=db_current_weather_json,
-    #                 engine=db_engine,
-    #                 echo=db_echo,
-    #             )
-    #         except Exception as exc:
-    #             msg = f"({type(exc)}) Error converting raw current weather response to schema. Details: {exc}"
-    #             log.error(msg)
+        if not errored:
+            try:
+                save_current_weather_response(
+                    current_weather_schema=db_current_weather_json,
+                    engine=db_engine,
+                    echo=db_echo,
+                )
+            except Exception as exc:
+                msg = f"({type(exc)}) Error converting raw current weather response to schema. Details: {exc}"
+                log.error(msg)
 
-    #             errored = True
+                errored = True
 
-    #     if errored:
-    #         log.warning(
-    #             "Errored while saving raw current weather response to database."
-    #         )
+        if errored:
+            log.warning(
+                "Errored while saving raw current weather response to database."
+            )
 
-    #         return decoded
+            return decoded
 
-    #     try:
-    #         db_location_in = location_dict_to_schema(location_dict=decoded["location"])
-    #     except Exception as exc:
-    #         msg = f"({type(exc)}) Error converting decoded response to schema. Details: {exc}"
-    #         log.error(msg)
+        try:
+            db_location_in = location_dict_to_schema(location_dict=decoded["location"])
+        except Exception as exc:
+            msg = f"({type(exc)}) Error converting decoded response to schema. Details: {exc}"
+            log.error(msg)
 
-    #         errored = True
+            errored = True
 
-    #     if not errored:
-    #         try:
-    #             db_current_weather_in = current_weather_dict_to_schema(
-    #                 current_weather_dict=decoded["current"]
-    #             )
-    #         except Exception as exc:
-    #             msg = f"({type(exc)}) Error converting decoded response to schema. Details: {exc}"
-    #             log.error(msg)
+        if not errored:
+            try:
+                db_current_weather_in = current_weather_dict_to_schema(
+                    current_weather_dict=decoded["current"]
+                )
+            except Exception as exc:
+                msg = f"({type(exc)}) Error converting decoded response to schema. Details: {exc}"
+                log.error(msg)
 
-    #             errored = True
+                errored = True
 
-    #     if not errored:
-    #         ## Save current weather to database
-    #         try:
-    #             db_current_weather_out = save_current_weather(
-    #                 location=db_location_in,
-    #                 current_weather=db_current_weather_in,
-    #                 engine=db_engine,
-    #                 echo=db_echo,
-    #             )
-    #             log.success("Saved current weather to database")
-    #             log.debug(f"Current weather from database: {db_current_weather_out}")
-    #         except Exception as exc:
-    #             msg = f"({type(exc)}) Error saving current weather to database: {exc}"
-    #             log.error(msg)
+        if not errored:
+            ## Save current weather to database
+            try:
+                db_current_weather_out = save_current_weather(
+                    location=db_location_in,
+                    current_weather=db_current_weather_in,
+                    engine=db_engine,
+                    echo=db_echo,
+                )
+                log.success("Saved current weather to database")
+                log.debug(f"Current weather from database: {db_current_weather_out}")
+            except Exception as exc:
+                msg = f"({type(exc)}) Error saving current weather to database: {exc}"
+                log.error(msg)
 
-    #             errored = True
+                errored = True
 
-    #     if errored:
-    #         log.warning(
-    #             "Errored while saving current weather and/or location to database."
-    #         )
+        if errored:
+            log.warning(
+                "Errored while saving current weather and/or location to database."
+            )
 
     return decoded

@@ -7,7 +7,7 @@ from loguru import logger as log
 from shared.domain.weatherapi.location import (
     LocationIn,
     LocationOut,
-    WeatherAPILocationModel,
+    LocationModel,
 )
 from shared.domain.weatherapi.weather.current import (
     CurrentWeatherIn,
@@ -71,19 +71,17 @@ def location_dict_to_schema(location_dict: dict):
 
 
 @log.catch
-def location_schema_to_model(location_schema: LocationIn) -> WeatherAPILocationModel:
+def location_schema_to_model(location_schema: LocationIn) -> LocationModel:
     """Convert a location schema to a database model.
 
     Params:
         location_schema (LocationIn): The location schema to convert.
 
     Returns:
-        WeatherAPILocationModel: The converted database model.
+        LocationModel: The converted database model.
 
     """
-    location_model: WeatherAPILocationModel = WeatherAPILocationModel(
-        **location_schema.model_dump()
-    )
+    location_model: LocationModel = LocationModel(**location_schema.model_dump())
 
     return location_model
 

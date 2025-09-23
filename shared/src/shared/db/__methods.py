@@ -137,25 +137,32 @@ def get_session_pool(engine: sa.Engine = None) -> so.sessionmaker[so.Session]:
 
 
 def create_base_metadata(
-    base: so.DeclarativeBase = None, engine: sa.Engine = None
+    base: so.DeclarativeBase = None,
+    engine: sa.Engine = None,
+    tables: list[sa.Table] | None = None,
 ) -> None:
     """Create a SQLAlchemy base object's table metadata.
 
+    If tables list is provided and not empty, create only those tables.
+    Otherwise, create all tables.
+
     Params:
-        base (sqlalchemy.orm.DeclarativeBase): A SQLAlchemy `DeclarativeBase` object to use for creating metadata.
+        base (sqlalchemy.orm.DeclarativeBase): The base with metadata.
+        engine (sqlalchemy.Engine): Engine to bind.
+        tables (list of sqlalchemy.Table): Optional subset of tables to create.
     """
     if base is None:
         raise ValueError("base cannot be None")
     if engine is None:
         raise ValueError("engine cannot be None")
     if not isinstance(engine, sa.Engine):
-        raise TypeError(
-            f"engine must be of type sqlalchemy.Engine. Got type: ({type(engine)})"
-        )
+        raise TypeError(f"engine must be sqlalchemy.Engine. Got {type(engine)}")
 
     try:
-        print(f"TEMPORARY: Base metadata tables: {base.metadata.tables.keys()}")
-        base.metadata.create_all(bind=engine)
+        if tables:
+            base.metadata.create_all(bind=engine, tables=tables)
+        else:
+            base.metadata.create_all(bind=engine)
     except Exception as exc:
         msg = Exception(
             f"({type(exc)}) Unhandled exception creating Base metadata. Details: {exc}"

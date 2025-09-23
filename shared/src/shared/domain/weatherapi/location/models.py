@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 from decimal import Decimal
 import typing as t
 
@@ -9,13 +10,26 @@ from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
+from sqlalchemy.types import JSON
 
-__all__ = [
-    "WeatherAPILocationModel",
-]
+__all__ = ["LocationModel", "LocationJSONModel"]
 
 
-class WeatherAPILocationModel(Base):
+class LocationJSONModel(Base):
+    __tablename__ = "weatherapi_location_json"
+
+    id: so.Mapped[annotated.INT_PK]
+
+    ## Automatically create when model is created in the database
+    created_at: so.Mapped[dt.datetime] = so.mapped_column(
+        sa.DateTime(timezone=True), default=dt.datetime.now, nullable=False
+    )
+
+    ## Raw JSON from a WeatherAPI HTTP request
+    location_json: so.Mapped[dict] = so.mapped_column(JSON)
+
+
+class LocationModel(Base):
     """WeatherAPI Location Model.
 
     Attributes:

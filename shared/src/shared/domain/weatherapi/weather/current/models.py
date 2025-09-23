@@ -5,7 +5,7 @@ from decimal import Decimal
 import typing as t
 
 from shared.db import Base, annotated
-from shared.domain.weatherapi.location import WeatherAPILocationModel
+from shared.domain.weatherapi.location import LocationModel
 
 from loguru import logger as log
 import sqlalchemy as sa
@@ -74,7 +74,7 @@ class CurrentWeatherModel(Base):
 
     Relationships:
         air_quality (CurrentWeatherAirQualityModel): The air quality model.
-        location (WeatherAPILocationModel): The location model.
+        location (LocationModel): The location model.
 
     """
 
@@ -137,14 +137,14 @@ class CurrentWeatherModel(Base):
 
     ## Foreign keys
 
-    ## Relationship back to WeatherAPILocationModel
+    ## Relationship back to LocationModel
     location_id: so.Mapped[int] = so.mapped_column(
         sa.ForeignKey("weatherapi_location.id")
     )
 
-    ## Relationship back to WeatherAPILocationModel using a string reference
-    location: so.Mapped[WeatherAPILocationModel] = so.relationship(
-        WeatherAPILocationModel, back_populates="current_weather_entries"
+    ## Relationship back to LocationModel using a string reference
+    location: so.Mapped[LocationModel] = so.relationship(
+        LocationModel, back_populates="current_weather_entries"
     )
 
 

@@ -4,7 +4,7 @@ import typing as t
 
 from shared.db.base import BaseRepository
 
-from .models import WeatherAPILocationModel
+from .models import LocationModel
 
 from loguru import logger as log
 import sqlalchemy as sa
@@ -16,8 +16,8 @@ __all__ = [
 ]
 
 
-class LocationRepository(BaseRepository[WeatherAPILocationModel]):
-    """Repository for WeatherAPILocationModel objects.
+class LocationRepository(BaseRepository[LocationModel]):
+    """Repository for LocationModel objects.
 
     Attributes:
         session (so.Session): The database session.
@@ -25,45 +25,45 @@ class LocationRepository(BaseRepository[WeatherAPILocationModel]):
     """
 
     def __init__(self, session: so.Session):
-        super().__init__(session, WeatherAPILocationModel)
+        super().__init__(session, LocationModel)
 
-    def get_by_id(self, id: int) -> WeatherAPILocationModel | None:
+    def get_by_id(self, id: int) -> LocationModel | None:
         """Get a location by its ID.
 
         Params:
             id (int): The ID of the location to retrieve.
 
         Returns:
-            (WeatherAPILocationModel): A WeatherAPILocationModel object.
+            (LocationModel): A LocationModel object.
             (None): None if no location is found matching criteria.
 
         """
         return (
-            self.session.query(WeatherAPILocationModel)
-            .filter(WeatherAPILocationModel.id == id)
+            self.session.query(LocationModel)
+            .filter(LocationModel.id == id)
             .one_or_none()
         )
 
-    def get_by_country(self, country: str) -> list[WeatherAPILocationModel] | None:
+    def get_by_country(self, country: str) -> list[LocationModel] | None:
         """Get a location by its country.
 
         Params:
             country (str): The country of the location.
 
         Returns:
-            (WeatherAPILocationModel): A WeatherAPILocationModel object.
+            (LocationModel): A LocationModel object.
             (None): None if no location is found matching criteria.
 
         """
         return (
-            self.session.query(WeatherAPILocationModel)
-            .filter(WeatherAPILocationModel.country == country)
+            self.session.query(LocationModel)
+            .filter(LocationModel.country == country)
             .all()
         )
 
     def get_by_country_and_region(
         self, region: str, country: str
-    ) -> WeatherAPILocationModel | None:
+    ) -> LocationModel | None:
         """Get a location by its country, and region/state.
 
         Params:
@@ -71,22 +71,19 @@ class LocationRepository(BaseRepository[WeatherAPILocationModel]):
             country (str): The country of the location.
 
         Returns:
-            (WeatherAPILocationModel): A WeatherAPILocationModel object.
+            (LocationModel): A LocationModel object.
             (None): None if no location is found matching criteria.
 
         """
         return (
-            self.session.query(WeatherAPILocationModel)
-            .filter(
-                WeatherAPILocationModel.country == country
-                and WeatherAPILocationModel.region == region
-            )
+            self.session.query(LocationModel)
+            .filter(LocationModel.country == country and LocationModel.region == region)
             .one_or_none()
         )
 
     def get_by_name_country_and_region(
         self, name: str, region: str, country: str
-    ) -> WeatherAPILocationModel | None:
+    ) -> LocationModel | None:
         """Get a location by its name, country, and region/state.
 
         Params:
@@ -95,38 +92,36 @@ class LocationRepository(BaseRepository[WeatherAPILocationModel]):
             country (str): The country of the location.
 
         Returns:
-            (WeatherAPILocationModel): A WeatherAPILocationModel object.
+            (LocationModel): A LocationModel object.
             (None): None if no location is found matching criteria.
 
         """
         return (
-            self.session.query(WeatherAPILocationModel)
+            self.session.query(LocationModel)
             .filter(
-                WeatherAPILocationModel.name == name
-                and WeatherAPILocationModel.country == country
-                and WeatherAPILocationModel.region == region
+                LocationModel.name == name
+                and LocationModel.country == country
+                and LocationModel.region == region
             )
             .one_or_none()
         )
 
-    def save(self, location: WeatherAPILocationModel) -> WeatherAPILocationModel | None:
+    def save(self, location: LocationModel) -> LocationModel | None:
         """Save a location to the database.
 
         Params:
-            location (WeatherAPILocationModel): The location to save.
+            location (LocationModel): The location to save.
 
         Returns:
-            WeatherAPILocationModel: The saved location.
+            LocationModel: The saved location.
 
         Raises:
             Exception: If location cannot be saved, an `Exception` is raised.
 
         """
         ## Check if location already exists
-        existing_location: WeatherAPILocationModel | None = (
-            self.get_by_name_country_and_region(
-                location.name, location.region, location.country
-            )
+        existing_location: LocationModel | None = self.get_by_name_country_and_region(
+            location.name, location.region, location.country
         )
 
         ## If location already exists, return from database

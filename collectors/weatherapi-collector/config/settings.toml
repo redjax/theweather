@@ -7,3 +7,4 @@ log_file_path = ""
 [weatherapi]
 location_name = "London"
 run_scheduler = false
+save_to_db = false
