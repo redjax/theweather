@@ -1,4 +1,8 @@
 ---
+volumes:
+  weatherapi_collector_logs: {}
+  weatherapi_collector_db: {}
+
 services:
   weatherapi-collector:
     restart: unless-stopped
@@ -14,7 +18,7 @@ services:
       TZ: ${TZ:-Etc/UTC}
 
       DYNACONF_LOGGING__LOG_LEVEL: ${WEATHERAPI_COLLECTOR_LOG_LEVEL:-INFO}
-      DYNACONF_LOGGING__LOG_FILE_PATH: ${WEATHERAPI_COLLECTOR_LOG_FILE_PATH:-/app/logs/weatherapi-collector.log}
+      DYNACONF_LOGGING__LOG_FILE_PATH: ${WEATHERAPI_COLLECTOR_LOG_FILE_PATH:-/var/log/weatherapi-collector/app.log}
 
       DYNACONF_HTTP__USE_CACHE: ${WEATHERAPI_COLLECTOR_USE_HTTP_CACHE:-false}
       DYNACONF_HTTP__CACHE_TYPE: ${WEATHERAPI_COLLECTOR_HTTP_CACHE_TYPE:-sqlite}
@@ -34,8 +38,10 @@ services:
       DYNACONF_DATABASE__DB_PASSWORD: ${WEATHERAPI_COLLECTOR_DB_PASSWORD}
       DYNACONF_DATABASE__DB_HOST: ${WEATHERAPI_COLLECTOR_DB_HOST}
       DYNACONF_DATABASE__DB_PORT: ${WEATHERAPI_COLLECTOR_DB_PORT}
-      DYNACONF_DATABASE__DB_DATABASE: ${WEATHERAPI_COLLECTOR_DB_DATABASE}
+      DYNACONF_DATABASE__DB_DATABASE: ${WEATHERAPI_COLLECTOR_DB_DATABASE:-/app/.db/weatherapi-collector.db}
       DYNACONF_DATABASE__DB_ECHO: ${WEATHERAPI_COLLECTOR_DB_ECHO:-false}
     volumes:
       - ../../shared/src:/app/shared/src:ro
       - ../../collectors/weatherapi-collector/src:/app/collectors/weatherapi-collector/src:ro
+      - ${WEATHERAPI_COLLECTOR_LOGS_DIR:-weatherapi_collector_logs}:/var/log/weatherapi-collector
+      - ${WEATHERAPI_COLLECTOR_DB_DIR:-weatherapi_collector_db}:/app/.db
