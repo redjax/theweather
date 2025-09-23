@@ -183,7 +183,7 @@ def save_current_weather(
         location_repo = domain_location.LocationRepository(session=session)
 
         try:
-            db_location: domain_location.WeatherAPIWeatherAPIWeatherAPILocationModel = (
+            db_location: domain_location.WeatherAPIWeatherAPILocationModel = (
                 save_location(location=location, engine=engine, echo=echo)
             )
         except Exception as exc:

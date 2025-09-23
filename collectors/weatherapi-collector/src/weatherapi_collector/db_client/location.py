@@ -68,19 +68,19 @@ def save_location(
             session=session
         )
 
-        log.debug("Converting Pydantic schema to WeatherAPILocationModel")
+        log.debug("Converting Pydantic schema to LocationModel")
         try:
-            location_model: domain_location.WeatherAPILocationModel = (
-                domain_location.WeatherAPILocationModel(**location.model_dump())
+            location_model: domain_location.LocationModel = (
+                domain_location.LocationModel(**location.model_dump())
             )
         except Exception as exc:
-            msg = f"({type(exc)}) Error converting location schema to WeatherAPILocationModel. Details: {exc}"
+            msg = f"({type(exc)}) Error converting location schema to LocationModel. Details: {exc}"
             log.error(msg)
 
             raise exc
 
         try:
-            db_location: domain_location.WeatherAPILocationModel | None = repo.save(
+            db_location: domain_location.LocationModel | None = repo.save(
                 location_model
             )
         except Exception as exc:
@@ -93,15 +93,13 @@ def save_location(
         msg = f"No exceptions thrown while saving location ['{location.name}, {location.region} ({location.country})'], but database returned None from saved object, which should not have happened."
         log.error(msg)
 
-        raise ValueError(
-            "location_out should be a WeatherAPILocationModel object, not None."
-        )
+        raise ValueError("location_out should be a LocationModel object, not None.")
 
     log.success(
         f"Saved location '{location.name}, {location.region} ({location.country})' to DB"
     )
 
-    log.debug("Converting WeatherAPILocationModel to LocationOut")
+    log.debug("Converting LocationModel to LocationOut")
     try:
         location_out: domain_location.LocationOut = (
             domain_location.LocationOut.model_validate(db_location.__dict__)
@@ -109,7 +107,7 @@ def save_location(
 
         return location_out
     except Exception as exc:
-        msg = f"({type(exc)}) Error converting WeatherAPILocationModel to LocationOut. Details: {exc}"
+        msg = f"({type(exc)}) Error converting LocationModel to LocationOut. Details: {exc}"
         log.error(msg)
 
         raise exc

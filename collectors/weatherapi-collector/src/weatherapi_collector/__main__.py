@@ -1,14 +1,10 @@
-import time
-
-from shared.config import SHARED_SETTINGS
-from shared.http_lib.config import HTTP_SETTINGS
-from shared import http_lib
-from shared.depends import get_httpx_controller
 from shared.setup import setup_loguru_logging
 
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
 from weatherapi_collector import client as weatherapi_client
 from weatherapi_collector.scheduled import start_weatherapi_scheduled_collection
+
+from weatherapi_collector.db_init import initialize_database
 
 import schedule
 from loguru import logger as log
@@ -74,6 +70,8 @@ if __name__ == "__main__":
 
     RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER", False)
     SAVE_TO_DB: bool = WEATHERAPI_SETTINGS.get("SAVE_TO_DB", False)
+
+    initialize_database()
 
     try:
         main(start_scheduled=RUN_SCHEDULE, save_to_db=SAVE_TO_DB)
