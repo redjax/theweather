@@ -7,6 +7,17 @@ from weatherapi_collector.db_client.location import save_location
 
 from shared import db
 from weatherapi_collector.depends import db_depends
+from weatherapi_collector.domain import (
+    CurrentWeatherJSONCollectorOut,
+    CurrentWeatherJSONCollectorIn,
+    CurrentWeatherJSONCollectorModel,
+    CurrentWeatherJSONCollectorRepository,
+    ForecastJSONCollectorRepository,
+    ForecastJSONCollectorIn,
+    ForecastJSONCollectorModel,
+    ForecastJSONCollectorOut,
+)
+
 from shared.domain.weatherapi import location as domain_location
 from shared.domain.weatherapi.weather import current as domain_current_weather
 from loguru import logger as log
@@ -22,19 +33,17 @@ __all__ = [
 
 
 def save_current_weather_response(
-    current_weather_schema: t.Union[
-        domain_current_weather.CurrentWeatherJSONIn, dict, str
-    ],
+    current_weather_schema: t.Union[CurrentWeatherJSONCollectorIn, dict, str],
     engine: sa.Engine | None = None,
     echo: bool = False,
-) -> domain_current_weather.CurrentWeatherJSONOut:
+) -> CurrentWeatherJSONCollectorOut:
     """Save a current weather response (in JSON form) to the database.
 
     Params:
-        current_weather_schema (CurrentWeatherJSONIn | dict | str): The current weather response to save. Can be a CurrentWeatherJSONIn domain object, dict, or JSON string.
+        current_weather_schema (CurrentWeatherJSONCollectorIn | dict | str): The current weather response to save. Can be a CurrentWeatherJSONCollectorIn domain object, dict, or JSON string.
 
     Returns:
-        CurrentWeatherJSONOut: The saved current weather response.
+        CurrentWeatherJSONCollectorOut: The saved current weather response.
 
     Raises:
         Exception: If current weather response cannot be saved, an `Exception` is raised.
@@ -54,13 +63,13 @@ def save_current_weather_response(
 
     if isinstance(current_weather_schema, dict):
         try:
-            current_weather_schema: domain_current_weather.CurrentWeatherJSONIn = (
-                domain_current_weather.CurrentWeatherJSONIn(
+            current_weather_schema: CurrentWeatherJSONCollectorIn = (
+                CurrentWeatherJSONCollectorIn(
                     current_weather_json=current_weather_schema
                 )
             )
         except Exception as exc:
-            msg = f"({type(exc)}) Error parsing current weather response dict as CurrentWeatherJSONIn domain object. Details: {exc}"
+            msg = f"({type(exc)}) Error parsing current weather response dict as CurrentWeatherJSONCollectorIn domain object. Details: {exc}"
             log.error(msg)
 
             raise exc
@@ -71,9 +80,9 @@ def save_current_weather_response(
     session_pool = db_depends.get_session_pool(engine=engine)
 
     with session_pool() as session:
-        repo = domain_current_weather.CurrentWeatherJSONRepository(session=session)
+        repo = CurrentWeatherJSONCollectorRepository(session=session)
 
-        current_weather_model = domain_current_weather.CurrentWeatherJSONModel(
+        current_weather_model = CurrentWeatherJSONCollectorModel(
             **current_weather_schema.model_dump()
         )
 
@@ -86,15 +95,15 @@ def save_current_weather_response(
             raise exc
 
     try:
-        current_weather_out: domain_current_weather.CurrentWeatherJSONOut = (
-            domain_current_weather.CurrentWeatherJSONOut.model_validate(
+        current_weather_out: CurrentWeatherJSONCollectorOut = (
+            CurrentWeatherJSONCollectorOut.model_validate(
                 current_weather_model.__dict__
             )
         )
 
         return current_weather_out
     except Exception as exc:
-        msg = f"({type(exc)}) Error converting JSON from database to CurrentWeatherJSONOut schema. Details: {exc}"
+        msg = f"({type(exc)}) Error converting JSON from database to CurrentWeatherJSONCollectorOut schema. Details: {exc}"
         log.error(msg)
 
         raise exc
@@ -183,8 +192,8 @@ def save_current_weather(
         location_repo = domain_location.LocationRepository(session=session)
 
         try:
-            db_location: domain_location.WeatherAPIWeatherAPILocationModel = (
-                save_location(location=location, engine=engine, echo=echo)
+            db_location: domain_location.LocationModel = save_location(
+                location=location, engine=engine, echo=echo
             )
         except Exception as exc:
             msg = f"({type(exc)}) Error saving location. Details: {exc}"

@@ -123,7 +123,7 @@ if __name__ == "__main__":
     initialize_database()
 
     ## Temporarily add minute(s) to list
-    # SCHEDULE_MINUTES_LIST.append("")
+    SCHEDULE_MINUTES_LIST.append("49")
 
     ## Initialize database engine
     db_engine = None
