@@ -47,11 +47,19 @@ def job_weatherapi_current_weather(
 
     if save_to_db:
         log.info(f"Saving current weather response to the database")
-        db_client.save_current_weather_response(
-            current_weather_schema=CurrentWeatherJSONIn(current_weather_json=result),
-            engine=engine,
-            echo=db_echo,
-        )
+        try:
+            db_client.save_current_weather_response(
+                current_weather_schema=CurrentWeatherJSONIn(
+                    current_weather_json=result
+                ),
+                engine=engine,
+                echo=db_echo,
+            )
+        except Exception as exc:
+            log.error(
+                f"({type(exc)}) Error saving current weather response JSON to the database: {exc}"
+            )
+            raise
 
 
 def job_weatherapi_weather_forecast(
@@ -80,11 +88,15 @@ def job_weatherapi_weather_forecast(
 
     if save_to_db:
         log.info(f"Saving current weather response to the database")
-        db_client.save_forecast(
-            forecast_schema=ForecastJSONIn(forecast_json=result),
-            engine=engine,
-            echo=db_echo,
-        )
+        try:
+            db_client.save_forecast(
+                forecast_schema=ForecastJSONIn(forecast_json=result),
+                engine=engine,
+                echo=db_echo,
+            )
+        except Exception as exc:
+            log.error(f"Failed saving forecast response JSON to database: {exc}")
+            raise
 
 
 def add_weatherapi_schedules(

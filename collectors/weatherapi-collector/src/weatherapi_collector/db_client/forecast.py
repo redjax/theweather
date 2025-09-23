@@ -5,7 +5,12 @@ import typing as t
 
 from shared import db
 from weatherapi_collector.depends import db_depends
-from shared.domain.weatherapi.weather import forecast as domain_forecast
+from weatherapi_collector.domain import (
+    ForecastJSONCollectorModel,
+    ForecastJSONCollectorOut,
+    ForecastJSONCollectorRepository,
+    ForecastJSONCollectorIn,
+)
 from loguru import logger as log
 
 # from domain.weatherapi import location as domain_location
@@ -21,10 +26,10 @@ __all__ = [
 
 
 def save_forecast(
-    forecast_schema: t.Union[domain_forecast.ForecastJSONIn, dict, str],
+    forecast_schema: t.Union[ForecastJSONCollectorModel, dict, str],
     engine: sa.Engine | None = None,
     echo: bool = False,
-) -> domain_forecast.ForecastJSONOut:
+) -> ForecastJSONCollectorOut:
     """Save a Forecast (in JSON form) to the database.
 
     Params:
@@ -52,9 +57,10 @@ def save_forecast(
             raise exc
 
     if isinstance(forecast_schema, dict):
+        log.debug(f"Coverting forecast dict to ForecastJSONCollectorIn domain object")
         try:
-            forecast_schema: domain_forecast.ForecastJSONIn = (
-                domain_forecast.ForecastJSONIn.model_validate(forecast_schema)
+            forecast_schema: ForecastJSONCollectorIn = ForecastJSONCollectorIn(
+                forecast_schema
             )
         except Exception as exc:
             msg = f"({type(exc)}) Error parsing forecast dict as ForecastJSONIn domain object. Details: {exc}"
@@ -68,11 +74,9 @@ def save_forecast(
     session_pool = db_depends.get_session_pool(engine=engine)
 
     with session_pool() as session:
-        repo = domain_forecast.ForecastJSONRepository(session=session)
+        repo = ForecastJSONCollectorRepository(session=session)
 
-        forecast_model = domain_forecast.ForecastJSONModel(
-            **forecast_schema.model_dump()
-        )
+        forecast_model = ForecastJSONCollectorModel(**forecast_schema.model_dump())
 
         try:
             db_forecast = repo.create(forecast_model)
@@ -83,8 +87,8 @@ def save_forecast(
             raise exc
 
     try:
-        forecast_out: domain_forecast.ForecastJSONOut = (
-            domain_forecast.ForecastJSONOut.model_validate(forecast_model.__dict__)
+        forecast_out: ForecastJSONCollectorOut = (
+            ForecastJSONCollectorOut.model_validate(forecast_model.__dict__)
         )
 
         return forecast_out
@@ -115,6 +119,6 @@ def count_weather_forecast(engine: sa.Engine | None = None, echo: bool = False):
     session_pool = db_depends.get_session_pool(engine=engine)
 
     with session_pool() as session:
-        repo = domain_forecast.ForecastJSONRepository(session=session)
+        repo = ForecastJSONCollectorRepository(session=session)
 
         return repo.count()
