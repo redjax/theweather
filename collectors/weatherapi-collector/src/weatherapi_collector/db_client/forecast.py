@@ -29,6 +29,8 @@ def save_forecast(
 
     Params:
         forecast (ForecastJSONIn | dict | str): The Forecast to save. Can be a ForecastJSONIn domain object, dict, or JSON string.
+        engine (Engine | None): The SQLAlchemy engine to use for the database connection. If None, a new engine will be created.
+        echo (bool): Whether to echo SQL statements to the console.
 
     Returns:
         ForecastJSONOut: The saved Forecast.
