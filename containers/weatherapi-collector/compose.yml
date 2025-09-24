@@ -9,7 +9,7 @@ services:
     build:
       ## Set context to repo root
       context: ../..
-      dockerfile: containers/weatherapi-collector/Dockerfile
+      dockerfile: containers/weatherapi-collector/Dockerfile.alternative
     working_dir: /app
     container_name: weatherapi-collector
     command: ["python3", "-m", "weatherapi_collector"]
