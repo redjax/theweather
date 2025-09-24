@@ -1,3 +1,26 @@
+## Direnv
+.envrc.secrets
+.envrc.local
+
+## Terraform
+.tfdata/
+
+## SOPS
+keys.txt
+key.txt
+!*.enc
+
+.config/*
+.config/sops/*
+.config/sops/age/*
+
+!.config/
+!.config/.gitkeep
+!.config/sops/
+!.config/sops/.gitkeep
+!.config/sops/age/
+!.config/sops/age/.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

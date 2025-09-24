@@ -1,0 +1,20 @@
+## Source this file in your .envrc with:
+#    source_env_if_exists ".direnv/init"
+#
+#  This file sources the local environment defined in
+#  files/modules in the .direnv directory.
+
+## Source paths first
+source_env_if_exists ./paths
+
+## Locale
+source_env_if_exists ./locale
+
+## Secrets
+source_env_if_exists ./.secrets
+
+## SOPS
+# source_env_if_exists ./sops
+
+## Terraform
+# source_env_if_exists ./terraform
