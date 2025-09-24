@@ -1,0 +1,2 @@
+## Terraform
+export TF_DATA_DIR="$REPO_ROOT/.tfdata"
