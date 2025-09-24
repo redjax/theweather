@@ -110,7 +110,7 @@ def run_linter(session: nox.Session):
     members = (
         list(root.glob("collectors/*"))
         + [root / "shared"]
-        + [root / "api-server"]
+        + [root / "servers/*"]
         + [root / "scripts"]
     )
 
@@ -161,7 +161,7 @@ def run_vulture_check(session: nox.Session):
     )
 
     ## api-server/
-    session.run("vulture", "api-server/", "--min-confidence", "100")
+    session.run("vulture", "servers/api-server/", "--min-confidence", "100")
 
     ## noxfile.py
     session.run("vulture", "noxfile.py", "--min-confidence", "100")
@@ -178,7 +178,7 @@ def export_requirements(session: nox.Session):
     app_paths = [
         "shared",
         "collectors/*",
-        "api-server",
+        "servers/*",
     ]
 
     ## Install uv to run commands

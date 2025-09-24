@@ -1,0 +1,35 @@
+[project]
+name = "api-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "redjax", email = "5534031+redjax@users.noreply.github.com" },
+]
+requires-python = ">=3.12"
+dependencies = [
+    "dynaconf>=3.2.11",
+    "fastapi>=0.117.1",
+    "loguru>=0.7.3",
+    "psycopg2-binary>=2.9.10",
+    "pymysql>=1.1.2",
+    "python-multipart>=0.0.20",
+    "sqlalchemy>=2.0.43",
+    "uvicorn[standard]>=0.37.0",
+]
+
+[project.scripts]
+api-server = "api_server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+shared = { workspace = true }
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
