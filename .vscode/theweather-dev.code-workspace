@@ -5,6 +5,10 @@
 			"name": "Repository Root"
 		},
 		{
+			"path": "../.direnv/",
+			"name": "Direnv Config"
+		},
+		{
 			"path": "../scripts/",
 			"name": "Repo Scripts"
 		},
