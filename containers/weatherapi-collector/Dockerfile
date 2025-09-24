@@ -9,42 +9,45 @@ RUN apt-get update -y && \
 
 RUN pip install --upgrade pip
 
-## Build layer: shared package
+## Build layer: Build shared package wheel
 FROM base AS build-shared
 
 WORKDIR /app
 
+# Copy shared package source
 COPY shared/ ./shared/
-COPY shared/requirements.txt ./shared/requirements.txt
 
-## Install shared package in container environment
-RUN pip install -e ./shared
+# Build the shared package into a wheel
+RUN cd shared && pip install build && python -m build
 
-## Build layer: weatherapi-collector package
-FROM build-shared AS build-weatherapi
+## Build layer: Build weatherapi-collector package
+FROM base AS build-app
 
 WORKDIR /app
 
-COPY collectors/weatherapi-collector/requirements.txt ./collectors/weatherapi-collector/requirements.txt
+# Copy the built shared package wheel from previous stage
+COPY --from=build-shared /app/shared/dist/*.whl ./wheels/
 
-## Install weatherapi-collector package in container environment
-RUN pip install -r ./collectors/weatherapi-collector/requirements.txt
-COPY collectors/weatherapi-collector/src/ ./collectors/weatherapi-collector/src/
+# Install the shared package from wheel (no path dependency)
+RUN pip install ./wheels/*.whl
+
+# Copy and install weatherapi-collector
+COPY collectors/weatherapi-collector/ ./weatherapi-collector/
+
+# Build weatherapi-collector
+RUN cd weatherapi-collector && pip install build && python -m build
+
+# Install weatherapi-collector
+RUN pip install ./weatherapi-collector/dist/*.whl
 
 ## Runtime layer
-FROM python:3.12-slim AS run
+FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
-## Copy Python site-packages & bins from build layer
-COPY --from=build-weatherapi /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=build-weatherapi /usr/local/bin /usr/local/bin
+# Copy installed packages from build layer
+COPY --from=build-app /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=build-app /usr/local/bin /usr/local/bin
 
-## Copy source dirs for packages
-COPY shared/src/ ./shared/src/
-COPY collectors/weatherapi-collector/src/ ./collectors/weatherapi-collector/src/
-
-## Add build apps to path
-ENV PYTHONPATH=/app/shared/src:/app/collectors/weatherapi-collector/src
-
+# Set the command
 CMD ["python3", "-m", "weatherapi_collector"]
