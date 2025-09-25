@@ -10,7 +10,6 @@ I use weather APIs to learn more about Python, git, and DevOps. This is another 
 - [Idea](#idea)
 - [Repository](#repository)
   - [Filetree](#filetree)
-- [Repository](#repository-1)
   - [Paths](#paths)
 
 
@@ -36,12 +35,6 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
 
 <!-- MARK:REPO_TREE:START -->
 <!-- MARK:REPO_TREE:END -->
-
-## Repository
-
-The monorepo is divided into packages/applications that can be built & executed in a container, data pipelines for cleaning, transforming, & storing data, a shared package to provide domain objects & common setup/configurations, and more.
-
-The [collectors](./collectors/) are isolated/independent Python packages that are built & executed inside a [Docker container](containers/weatherapi-collector/). This allows for doing a git sparse checkout of the `shared` and `weather-collector` packages so they can be built/run on another host, routing responses back to the central API server, or on the localhost for development.
 
 ### Paths
 
