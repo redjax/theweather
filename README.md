@@ -13,21 +13,6 @@ I use weather APIs to learn more about Python, git, and DevOps. This is another 
 - [Repository](#repository-1)
   - [Paths](#paths)
 
-# The Weather <!-- omit in toc -->
-
-I use weather APIs to learn more about Python, git, and DevOps. This is another project to explore a monorepo architecture.
-
-> [!WARNING]
-> This README is incomplete until this message is removed
-
-## Table of Contents <!-- omit in toc -->
-
-- [Idea](#idea)
-- [Repository](#repository)
-  - [Filetree](#filetree)
-- [Repository](#repository-1)
-  - [Paths](#paths)
-
 
 ## Idea
 
