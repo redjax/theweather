@@ -1,0 +1,69 @@
+tz = "Etc/UTC"
+
+[logging]
+log_level = "INFO"
+log_file_path = ".logs/api_server.log"
+
+[fastapi]
+debug = false
+cors = true
+root_path = "/"
+title = "TheWeather API"
+description = "Central server for receiving weather metrics retrieved by the collectors."
+version = "0.0.1"
+# openapi_url = "/docs/openapi"
+openapi_url = "/openapi.json"
+redirect_slashes = true
+docs_url = "/docs"
+redoc_url = "/redoc"
+openapi_prefix = ""
+root_path_in_servers = true
+include_admin_router = false
+
+[uvicorn]
+app = "api_server.main:app"
+host = "0.0.0.0"
+port = 8000
+root_path = "/"
+reload = true
+log_level = "INFO"
+workers = 1
+
+[http]
+use_cache = false
+cache_type = "sqlite"
+cache_file_dir = ".cache/http/hishel"
+cache_db_file = ".cache/http/hishel.sqlite3"
+cache_check_ttl_every = 60
+cache_ttl = 900
+
+[database]
+## SQLite
+# db_type = "sqlite"
+# db_drivername = "sqlite+pysqlite"
+# db_username = ""
+# # Set in .secrets.toml
+# # db_password = ""
+# db_host = ""
+# db_port = ""
+# db_database = ".db/db.dev.sqlite3"
+# db_echo = true
+
+## Postgres
+db_type = "postgres"
+db_drivername = "postgresql+psycopg2"
+db_username = "postgres"
+# Set in .secrets.toml
+# db_password = ""
+db_host = "localhost"
+db_port = "5432"
+db_database = "theweather-dev"
+db_echo = true
+
+## MySQL
+# db_type = "mysql"
+# db_drivername = "mysql+pymysql"
+# db_username = "mysql"
+# db_host = "localhost"
+# db_port = 3306
+# db_database = "theweather-dev"

@@ -1,21 +1,14 @@
 [project]
 name = "theweather"
 version = "0.1.0"
-description = "Add your description here"
+description = "Monorepo tooling configuration for theweather applications"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["shared", "weatherapi-collector", "api-server"]
+# No dependencies - this is just for repo-wide tooling
+dependencies = []
 
 [dependency-groups]
 dev = ["nox>=2025.5.1", "ruff>=0.13.1"]
-
-[tool.uv.workspace]
-members = ["collectors/*", "shared", "servers/*"]
-
-[tool.uv.sources]
-shared = { workspace = true }
-weatherapi-collector = { workspace = true }
-api-server = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = []

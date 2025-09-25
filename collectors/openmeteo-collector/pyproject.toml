@@ -1,7 +1,7 @@
 [project]
 name = "openmeteo-collector"
 version = "0.1.0"
-description = "Add your description here"
+description = "Weather data collector using OpenMeteo API"
 readme = "README.md"
 authors = [
     { name = "redjax", email = "5534031+redjax@users.noreply.github.com" }
@@ -9,9 +9,25 @@ authors = [
 requires-python = ">=3.12"
 dependencies = []
 
+[dependency-groups]
+dev = ["theweather-shared"]
+
 [project.scripts]
 openmeteo-collector = "openmeteo_collector:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openmeteo_collector"]
+
+# For local development - editable install of shared package
+[tool.uv.sources]
+theweather-shared = { path = "../../shared", editable = true }
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
