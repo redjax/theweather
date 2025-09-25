@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import logging
 import typing as t
 
@@ -18,6 +19,57 @@ __all__ = [
 ]
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="TheWeather API server launch script.")
+
+    parser.add_argument(
+        "--app",
+        type=str,
+        default=UVICORN_SETTINGS.get("APP", "api_server.main:app"),
+        help="Path to the FastAPI `App()` instance, i.e. `main:app`.",
+    )
+    parser.add_argument(
+        "--host",
+        type=str,
+        default=UVICORN_SETTINGS.get("HOST", "127.0.0.1"),
+        help="Host IP to serve API on. (default: 127.0.0.1)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=UVICORN_SETTINGS.get("PORT", 8000),
+        help="Port to serve API on. (default: 8000)",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=UVICORN_SETTINGS.get("WORKERS", 1),
+        help="Number of worker processes. (default: 1)",
+    )
+    parser.add_argument(
+        "--reload",
+        action="store_true",
+        default=UVICORN_SETTINGS.get("RELOAD", False),
+        help="Reload on file changes. (default: False)",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=UVICORN_SETTINGS.get("DEBUG", False),
+        help="Enable debug mode. (default: False)",
+    )
+    parser.add_argument(
+        "--log-level",
+        default=UVICORN_SETTINGS.get("LOG_LEVEL", "INFO"),
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Logging level. (default: INFO)",
+    )
+
+    args = parser.parse_args()
+
+    return args
+
+
 class UvicornCustomServer(BaseModel):
     """Customize a Uvicorn server by passing a dict to UvicornCustomServer.parse_obj(dict).
 
@@ -29,6 +81,7 @@ class UvicornCustomServer(BaseModel):
     app: str = "api_server.main:app"
     host: str = "0.0.0.0"
     port: int = 8000
+    workers: int = 1
     root_path: str = "/"
     reload: bool = False
 
@@ -37,6 +90,7 @@ class UvicornCustomServer(BaseModel):
             app=self.app,
             host=self.host,
             port=self.port,
+            workers=self.workers,
             reload=self.reload,
             root_path=self.root_path,
         )
@@ -49,17 +103,19 @@ class UvicornSettings(BaseModel):
         app (str): Path to the FastAPI `App()` instance, i.e. `main:app`.
         host (str): Host address/FQDN for the server.
         port (int): Port the server should run on.
+        workers (int): Number of worker processes.
         root_path (str): The server's root path/endpoint.
         reload (bool): If `True`, server will reload when changes are detected.
         log_level (str): The log level for the Uvicorn server.
     """
 
-    app: str = Field(default=UVICORN_SETTINGS.get("APP"))
-    host: str = Field(default=UVICORN_SETTINGS.get("HOST"))
-    port: int = Field(default=UVICORN_SETTINGS.get("PORT"))
-    root_path: str = Field(default=UVICORN_SETTINGS.get("ROOT_PATH"))
-    reload: bool = Field(default=UVICORN_SETTINGS.get("RELOAD"))
-    log_level: str = Field(default=UVICORN_SETTINGS.get("LOG_LEVEL"))
+    app: str = Field(default=UVICORN_SETTINGS.get("APP", "main:app"))
+    host: str = Field(default=UVICORN_SETTINGS.get("HOST", "127.0.0.1"))
+    port: int = Field(default=UVICORN_SETTINGS.get("PORT", 8000))
+    workers: int = Field(default=UVICORN_SETTINGS.get("WORKERS", 1))
+    root_path: str = Field(default=UVICORN_SETTINGS.get("ROOT_PATH", "/"))
+    reload: bool = Field(default=UVICORN_SETTINGS.get("RELOAD", False))
+    log_level: str = Field(default=UVICORN_SETTINGS.get("LOG_LEVEL", "INFO"))
 
 
 def initialize_custom_server(
@@ -125,10 +181,19 @@ def run_uvicorn_server(uvicorn_server: UvicornCustomServer):
 
 
 if __name__ == "__main__":
-    setup_loguru_logging(log_level=LOGGING_SETTINGS.get("LOG_LEVEL", default="INFO"))
+    args = parse_args()
+
+    setup_loguru_logging(log_level=args.log_level.upper())
     # setup.setup_database()
 
-    uvicorn_settings = UvicornSettings()
+    uvicorn_settings = UvicornSettings(
+        app=args.app,
+        host=args.host,
+        port=args.port,
+        workers=args.workers,
+        reload=args.reload,
+        log_level=args.log_level,
+    )
     log.debug(f"Uvicorn settings object: {uvicorn_settings}")
 
     UVICORN_SERVER: UvicornCustomServer = initialize_custom_server(

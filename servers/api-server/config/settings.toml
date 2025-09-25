@@ -27,6 +27,7 @@ port = 8000
 root_path = "/"
 reload = true
 log_level = "INFO"
+workers = 1
 
 [http]
 use_cache = false
