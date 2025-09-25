@@ -34,6 +34,7 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
 ### Filetree
 
 <!-- MARK:REPO_TREE:START -->
+```shell
 .
 ├── shared
 ├── servers
@@ -49,6 +50,7 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
 └── collectors
     ├── weatherapi-collector
     └── openmeteo-collector
+```
 <!-- MARK:REPO_TREE:END -->
 
 ### Paths
