@@ -69,6 +69,9 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
 - [`collectors/`](./collectors/)
   - Isolated collection packages.
   - Encapsulate functionality to request weather data from an API & pass it to the API for storage.
+  - Each collector has a SQLite database for saving API responses locally in case of communication interruption with the server
+    - Saved responses have a `retain` boolean value, and once POSTed successfully it will be set to `False`.
+    - Records are garbage collected on a schedule, re-trying any with `retain=True` and removing any with `retain=False`
   - Can be run on the local machine, or a remote machine with networking back to the API server host.
   - [`weatherapi-collector`](./collectors/weatherapi-collector/)
     - Collector package for the [WeatherAPI](https://www.weatherapi.com) REST API.
@@ -77,8 +80,6 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
 - [`containers/`](./containers/)
   - Dockerfiles & compose stacks for the apps.
   - Each collector has its own Dockerfile and `compose.yml` in this path, as well as a `.env` and a SQLite database for storing requests in case of interruptions in communication with the API server.
-    - Saved responses have a `retain` boolean value, and once POSTed successfully it will be set to `False`.
-    - Records are garbage collected on a schedule, re-trying any with `retain=True` and removing any with `retain=False`
   - This allows for running the app in its own container, for development or deployment.
   - (not implemented yet) stacks that orchstrate multiple containers.
 - [`scripts/`](./scripts/)
