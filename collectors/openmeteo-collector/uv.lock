@@ -199,6 +199,21 @@ wheels = [
 ]
 
 [[package]]
+name = "openmeteo-collector"
+version = "0.1.0"
+source = { editable = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "theweather-shared" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "theweather-shared", editable = "../../shared" }]
+
+[[package]]
 name = "pydantic"
 version = "2.11.9"
 source = { registry = "https://pypi.org/simple" }
@@ -296,7 +311,7 @@ wheels = [
 [[package]]
 name = "theweather-shared"
 version = "0.1.0"
-source = { editable = "." }
+source = { editable = "../../shared" }
 dependencies = [
     { name = "alembic" },
     { name = "dynaconf" },

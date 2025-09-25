@@ -9,42 +9,32 @@ RUN apt-get update -y && \
 
 RUN pip install --upgrade pip
 
-## Build layer: shared package
-FROM base AS build-shared
+## Build layer: Install dependencies from exported requirements
+FROM base AS build
 
 WORKDIR /app
 
+## Generated with: uv export --format requirements-txt --no-dev > requirements.txt
+COPY collectors/weatherapi-collector/requirements.txt ./
+
+RUN pip install -r requirements.txt
+
+## Copy shared package source and install it
 COPY shared/ ./shared/
-COPY shared/requirements.txt ./shared/requirements.txt
+RUN cd shared && pip install .
 
-## Install shared package in container environment
-RUN pip install -e ./shared
-
-## Build layer: weatherapi-collector package
-FROM build-shared AS build-weatherapi
-
-WORKDIR /app
-
-COPY collectors/weatherapi-collector/requirements.txt ./collectors/weatherapi-collector/requirements.txt
-
-## Install weatherapi-collector package in container environment
-RUN pip install -r ./collectors/weatherapi-collector/requirements.txt
-COPY collectors/weatherapi-collector/src/ ./collectors/weatherapi-collector/src/
+## Copy and install weatherapi-collector
+COPY collectors/weatherapi-collector/ ./weatherapi-collector/
+RUN cd weatherapi-collector && pip install .
 
 ## Runtime layer
-FROM python:3.12-slim AS run
+FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
-## Copy Python site-packages & bins from build layer
-COPY --from=build-weatherapi /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=build-weatherapi /usr/local/bin /usr/local/bin
+## Copy installed packages from build layer
+COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=build /usr/local/bin /usr/local/bin
 
-## Copy source dirs for packages
-COPY shared/src/ ./shared/src/
-COPY collectors/weatherapi-collector/src/ ./collectors/weatherapi-collector/src/
-
-## Add build apps to path
-ENV PYTHONPATH=/app/shared/src:/app/collectors/weatherapi-collector/src
-
+## Set the command
 CMD ["python3", "-m", "weatherapi_collector"]

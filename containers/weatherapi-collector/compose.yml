@@ -14,7 +14,6 @@ services:
     container_name: weatherapi-collector
     command: ["python3", "-m", "weatherapi_collector"]
     environment:
-      PYTHONPATH: /app/shared/src:/app/collectors/weatherapi-collector/src
       TZ: ${TZ:-Etc/UTC}
 
       DYNACONF_LOGGING__LOG_LEVEL: ${WEATHERAPI_COLLECTOR_LOG_LEVEL:-INFO}
