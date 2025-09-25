@@ -68,7 +68,9 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
   - Import code from around the repository to demo it or test
   - Ignored in containers
 - [`api-server`](./api-server/)
-  - `NOT IMPLEMENTED YET`
+  - The central server collectors communicate with.
+  - REST API implemented with FastAPI.
+  - Stores metrics POSTed by collectors in the central database.
 - [`collectors/`](./collectors/)
   - Isolated collection packages.
   - Encapsulate functionality to request weather data from an API & pass it to the API for storage.
@@ -79,7 +81,9 @@ The [collectors](./collectors/) are isolated/independent Python packages that ar
     - Collector package for the [OpenMeteo](https://open-meteo.com) REST API.
 - [`containers/`](./containers/)
   - Dockerfiles & compose stacks for the apps.
-  - Each collector has its own Dockerfile and `compose.yml` in this path, as well as a `.env`.
+  - Each collector has its own Dockerfile and `compose.yml` in this path, as well as a `.env` and a SQLite database for storing requests in case of interruptions in communication with the API server.
+    - Saved responses have a `retain` boolean value, and once POSTed successfully it will be set to `False`.
+    - Records are garbage collected on a schedule, re-trying any with `retain=True` and removing any with `retain=False`
   - This allows for running the app in its own container, for development or deployment.
   - (not implemented yet) stacks that orchstrate multiple containers.
 - [`scripts/`](./scripts/)
