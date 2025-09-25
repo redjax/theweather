@@ -6,12 +6,17 @@ from shared.domain.collectors.payloads import (
 from loguru import logger as log
 from fastapi import APIRouter, status, HTTPException
 
-__all__ = ["collectors_router"]
+__all__ = ["router"]
 
-collectors_router = APIRouter(prefix="/v1", tags=["collectors"])
+router = APIRouter(prefix="/collectors", tags=["collectors"])
 
 
-@collectors_router.post("/weather", status_code=status.HTTP_201_CREATED)
+@router.get("/status", status_code=status.HTTP_200_OK)
+def collectors_status():
+    return {"status": "Collectors endpoint online"}
+
+
+@router.post("/weather", status_code=status.HTTP_201_CREATED)
 def receive_weather(payload: WeatherCollectorPayloadIn):
     log.debug(f"Received: {payload.source} | {payload.label} | {payload.data}")
 

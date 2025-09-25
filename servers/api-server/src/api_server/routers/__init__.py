@@ -1,1 +1,1 @@
-from .health import *
+from . import api_router, health

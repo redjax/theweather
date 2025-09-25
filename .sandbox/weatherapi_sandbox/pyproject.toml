@@ -1,0 +1,16 @@
+[project]
+name = "weatherapi-sandbox"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "api-server",
+    "dynaconf>=3.2.11",
+    "httpx>=0.28.1",
+    "theweather-shared",
+    "weatherapi-collector",
+]
+
+[tool.uv.sources]
+theweather-shared = { path = "../../shared" }
+weatherapi-collector = { path = "../../collectors/weatherapi-collector" }
+api-server = { path = "../../servers/api-server" }

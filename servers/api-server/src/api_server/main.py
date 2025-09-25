@@ -1,5 +1,5 @@
 from api_server.routers import health
-from api_server.routers.v1 import api_v1_router
+from api_server.routers import api_router
 from api_server.config import FASTAPI_SETTINGS
 
 from fastapi import FastAPI
@@ -16,12 +16,7 @@ app = FastAPI(
 )
 
 app.include_router(health.router)
-app.include_router(api_v1_router)
-
-
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
+app.include_router(api_router.router)
 
 
 if __name__ == "__main__":
