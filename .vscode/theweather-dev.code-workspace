@@ -9,6 +9,14 @@
 			"name": "Direnv Config"
 		},
 		{
+			"path": "../containers/",
+			"name": "Containers"
+		},
+		{
+			"path": "../shared/",
+			"name": "Shared Package"
+		},
+		{
 			"path": "../scripts/",
 			"name": "Repo Scripts"
 		},
@@ -25,16 +33,8 @@
 			"name": "WeatherAPI Collector"
 		},
 		{
-			"path": "../containers/weatherapi-collector/",
-			"name": "WeatherAPI Container"
-		},
-		{
 			"path": "../collectors/openmeteo-collector/",
 			"name": "OpenMeteo Collector"
-		},
-		{
-			"path": "../shared/",
-			"name": "Shared Package"
 		}
 	]
 }
