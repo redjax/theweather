@@ -180,7 +180,7 @@ def run_uvicorn_server(uvicorn_server: UvicornCustomServer):
         raise exc
 
 
-if __name__ == "__main__":
+def main():
     args = parse_args()
 
     setup_loguru_logging(log_level=args.log_level.upper())
@@ -208,3 +208,11 @@ if __name__ == "__main__":
         log.critical(msg)
 
         raise exc
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exc:
+        print(f"[ERROR] Failed to start API server: ({type(exc)}) {exc}")
+        exit(1)
