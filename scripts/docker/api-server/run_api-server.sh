@@ -64,7 +64,7 @@ run_container() {
 
     echo "Running api-server container"
 
-    local cmd=(docker compose -f "$WEATHERAPI_COLLECTOR_CONTAINER_DIR/compose.yml" up -d)
+    local cmd=(docker compose -f "$API_SERVER_CONTAINER_DIR/compose.yml" up -d)
     if [[ "$REBUILD" == "true" ]]; then
         echo "Rebuilding api-server container"
         if [[ "$SKIP_CACHE" == "true" ]]; then

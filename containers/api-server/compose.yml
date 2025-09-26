@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     build:
       context: ../..
-      dockerfile: containers/api_server/Dockerfile
+      dockerfile: containers/api-server/Dockerfile
     working_dir: /app/api-server
     container_name: api-server
     command: ["python3", "-m", "api_server"]
