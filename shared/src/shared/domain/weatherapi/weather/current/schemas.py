@@ -4,6 +4,12 @@ import datetime as dt
 from decimal import Decimal
 import typing as t
 
+from .models import (
+    CurrentWeatherModel,
+    CurrentWeatherConditionModel,
+    CurrentWeatherAirQualityModel,
+)
+
 from loguru import logger as log
 from pydantic import (
     BaseModel,
@@ -22,36 +28,38 @@ __all__ = [
     "CurrentWeatherIn",
     "CurrentWeatherOut",
     "CurrentWeatherJSONIn",
-    "CurrentWeatherJSONOut"
+    "CurrentWeatherJSONOut",
 ]
+
 
 class CurrentWeatherJSONIn(BaseModel):
     """Current weather request in raw JSON format.
-    
+
     Attributes:
       current_weather_json (dict): The ccurrent weather in JSON format.
-    
+
     """
-    
+
     current_weather_json: dict
-    
+
 
 class CurrentWeatherJSONOut(CurrentWeatherJSONIn):
     """Current weather in JSON format, retrieved from database.
-    
+
     Attributes:
       id (int): The ID of the current weather response.
       created_at (datetime): The creation date of the current weather response.
 
     """
-    
+
     id: int
-    
+
     created_at: dt.datetime
+
 
 class CurrentWeatherConditionIn(BaseModel):
     """Current weather condition schema.
-    
+
     Attributes:
         text (str): The text description of the current weather condition.
         icon (str): The icon representing the current weather condition.
@@ -66,7 +74,7 @@ class CurrentWeatherConditionIn(BaseModel):
 
 class CurrentWeatherConditionOut(CurrentWeatherConditionIn):
     """Current weather condition schema from the database.
-    
+
     Attributes:
         id (int): The unique identifier for the current weather condition.
 
@@ -77,7 +85,7 @@ class CurrentWeatherConditionOut(CurrentWeatherConditionIn):
 
 class CurrentWeatherAirQualityIn(BaseModel):
     """Current weather air quality schema.
-    
+
     Attributes:
         co (Decimal): The carbon monoxide concentration in the air.
         no2 (Decimal): The nitrogen dioxide concentration in the air.
@@ -89,7 +97,7 @@ class CurrentWeatherAirQualityIn(BaseModel):
         gb_defra_index (int): The Great Britain Defra index for air quality.
 
     """
-    
+
     co: Decimal
     no2: Decimal
     o3: Decimal
@@ -102,18 +110,18 @@ class CurrentWeatherAirQualityIn(BaseModel):
 
 class CurrentWeatherAirQualityOut(CurrentWeatherAirQualityIn):
     """Current weather air quality schema from the database.
-    
+
     Attributes:
         id (int): The unique identifier for the current weather air quality.
 
     """
-    
+
     id: int
 
 
 class CurrentWeatherIn(BaseModel):
     """Current weather schema.
-    
+
     Attributes:
         id (int): The unique identifier for the current weather.
         name (str): The name of the location.
@@ -131,7 +139,7 @@ class CurrentWeatherIn(BaseModel):
         is_day (int): The day or night indicator.
         condition (CurrentWeatherConditionIn): The current weather condition.
         wind_mph (Decimal): The wind speed in miles per hour.
-        wind_kph (Decimal): The wind speed in kilometers per hour.    
+        wind_kph (Decimal): The wind speed in kilometers per hour.
         wind_degree (int): The wind direction in degrees.
         wind_dir (str): The wind direction.
         pressure_mb (Decimal): The pressure in millibars.
@@ -141,7 +149,7 @@ class CurrentWeatherIn(BaseModel):
         humidity (int): The humidity percentage.
         cloud (int): The cloud coverage percentage.
         feelslike_c (Decimal): The feels-like temperature in Celsius.
-        feelslike_f (Decimal): The feels-like temperature in Fahrenheit.    
+        feelslike_f (Decimal): The feels-like temperature in Fahrenheit.
         windchill_c (Decimal): The windchill temperature in Celsius.
         windchill_f (Decimal): The windchill temperature in Fahrenheit.
         heatindex_c (Decimal): The heat index temperature in Celsius.
@@ -155,7 +163,7 @@ class CurrentWeatherIn(BaseModel):
         air_quality (CurrentWeatherAirQualityIn | None): The current weather air quality.
 
     """
-    
+
     last_updated_epoch: int
     last_updated: str
     temp_c: Decimal
@@ -186,13 +194,55 @@ class CurrentWeatherIn(BaseModel):
     gust_kph: Decimal
     air_quality: CurrentWeatherAirQualityIn | None = Field(default=None)
 
+    def to_orm(self) -> CurrentWeatherModel:
+        condition_model = CurrentWeatherConditionModel(**self.condition.model_dump())
+
+        air_quality_model = None
+
+        if self.air_quality:
+            air_quality_model = CurrentWeatherAirQualityModel(
+                **self.air_quality.model_dump()
+            )
+
+        return CurrentWeatherModel(
+            last_updated_epoch=self.last_updated_epoch,
+            last_updated=self.last_updated,
+            temp_c=self.temp_c,
+            temp_f=self.temp_f,
+            is_day=self.is_day,
+            wind_mph=self.wind_mph,
+            wind_kph=self.wind_kph,
+            wind_degree=self.wind_degree,
+            wind_dir=self.wind_dir,
+            pressure_mb=self.pressure_mb,
+            pressure_in=self.pressure_in,
+            precip_mm=self.precip_mm,
+            precip_in=self.precip_in,
+            humidity=self.humidity,
+            cloud=self.cloud,
+            feelslike_c=self.feelslike_c,
+            feelslike_f=self.feelslike_f,
+            windchill_c=self.windchill_c,
+            windchill_f=self.windchill_f,
+            heatindex_c=self.heatindex_c,
+            heatindex_f=self.heatindex_f,
+            dewpoint_c=self.dewpoint_c,
+            dewpoint_f=self.dewpoint_f,
+            vis_km=self.vis_km,
+            uv=self.uv,
+            gust_mph=self.gust_mph,
+            gust_kph=self.gust_kph,
+            condition=condition_model,
+            air_quality=air_quality_model,
+        )
+
 
 class CurrentWeatherOut(CurrentWeatherIn):
     """Current weather schema from database.
-    
+
     Attributes:
         id (int): The unique identifier for the current weather.
 
     """
-    
+
     id: int

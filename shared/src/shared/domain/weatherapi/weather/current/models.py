@@ -22,6 +22,14 @@ __all__ = [
 
 
 class CurrentWeatherJSONModel(Base):
+    """Current weather raw JSON model.
+
+    Attributes:
+        id (int): The ID of the current weather record.
+        created_at (datetime): The date and time the record was created.
+        current_weather_json (dict): The current weather in JSON format.
+    """
+
     __tablename__ = "weatherapi_current_json"
 
     id: so.Mapped[annotated.INT_PK]
