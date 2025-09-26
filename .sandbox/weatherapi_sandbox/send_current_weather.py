@@ -35,7 +35,7 @@ except Exception as exc:
 
 ex_payload: WeatherCollectorPayloadIn = WeatherCollectorPayloadIn(
     source="weatherapi",
-    label="test",
+    label="current",
     data=current_weather,
 )
 
