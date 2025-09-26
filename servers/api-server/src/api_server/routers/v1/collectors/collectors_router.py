@@ -1,3 +1,6 @@
+import typing as t
+import json
+
 from shared.domain.collectors.payloads import WeatherCollectorPayloadIn
 from shared.domain.weatherapi.weather import (
     CurrentWeatherJSONIn,
@@ -13,11 +16,13 @@ from shared.domain.weatherapi.location import (
     LocationRepository,
 )
 from api_server.depends import get_db
-
+from api_server.routers.v1.collectors._db import save_weatherapi_current_weather
 
 from loguru import logger as log
 from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+import sqlalchemy.exc as sa_exc
 
 
 __all__ = ["router"]
@@ -37,108 +42,72 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
     )
 
     match payload.source:
+
+        ## WeatherAPI collector data
         case "weatherapi":
             match payload.label:
+
+                ## Current weather data
                 case "current":
                     log.info(f"Received current weather from collector")
 
-                    ## Raw JSON response schema
-                    raw_json = CurrentWeatherJSONIn(current_weather_json=payload.data)
+                    ## Attempt to save to database
+                    try:
+                        db_models: dict[
+                            str,
+                            t.Union[
+                                LocationModel,
+                                CurrentWeatherModel,
+                                CurrentWeatherJSONModel,
+                            ],
+                        ] = save_weatherapi_current_weather(
+                            data=payload.data, session=db
+                        )
+                    except sa_exc.IntegrityError as exc:
+                        log.error(f"Failed to save current weather to database: {exc}")
+                        raise HTTPException(
+                            status_code=409,
+                            detail="Weather data already exists in database.",
+                        )
+                    except sa_exc.InternalError as internal_err:
+                        log.error(
+                            f"Failed to save current weather to database: {internal_err}"
+                        )
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Database error occurred while saving data.",
+                        )
+                    except sa_exc.DBAPIError as db_err:
+                        log.error(
+                            f"Failed to save current weather to database: {db_err}"
+                        )
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Database error occurred while saving data.",
+                        )
 
-                    ## Location schema
-                    location = LocationIn.model_validate(payload.data["location"])
-                    ## Current weather schema
-                    current_weather = CurrentWeatherIn.model_validate(
-                        payload.data["current"]
+                    ## Extract models from db save function return
+                    db_current_weather = db_models["current_weather"]
+                    db_current_weather_json = db_models["current_weather_json"]
+                    db_location = db_models["location"]
+
+                    return JSONResponse(
+                        content={
+                            "success": True,
+                            "message": "Weather data saved to database.",
+                            "location_id": db_location.id,
+                            "current_weather_id": db_current_weather.id,
+                            "current_weather_json_id": db_current_weather_json.id,
+                        },
+                        status_code=status.HTTP_201_CREATED,
                     )
 
-                    ## Build DB models
-                    location_model = LocationModel(**location.model_dump())
-                    current_weather_model = current_weather.to_orm()
-
-                    ## Initialize repositories
-                    current_weather_json_repo = CurrentWeatherJSONRepository(db)
-                    location_repo = LocationRepository(db)
-                    current_weather_repo = CurrentWeatherRepository(db)
-
-                    ## Save raw JSON
-                    try:
-                        db_current_weather_json = current_weather_json_repo.create(
-                            current_weather_json_model := CurrentWeatherJSONModel(
-                                current_weather_json=raw_json.current_weather_json
-                            )
-                        )
-                        log.debug("Saved raw current weather JSON")
-                    except Exception as exc:
-                        log.error(f"Error saving current weather JSON: {exc}")
-                        raise HTTPException(
-                            status_code=400, detail="Error saving current weather JSON"
-                        )
-
-                    ## Check if Location exists, else save
-                    try:
-                        db_location = location_repo.get_by_name_country_and_region(
-                            location_model.name,
-                            location_model.region,
-                            location_model.country,
-                        )
-                        if not db_location:
-                            db_location = location_repo.save(location_model)
-                        log.debug(f"Using location id: {db_location.id}")
-                    except Exception as exc:
-                        log.error(f"Error saving location: {exc}")
-                        raise HTTPException(
-                            status_code=400, detail="Error saving location"
-                        )
-
-                    ## Check if current weather already exists for last_updated_epoch, skip insert if so
-                    existing_weather = current_weather_repo.get_by_last_updated_epoch(
-                        current_weather.last_updated_epoch
-                    )
-                    if existing_weather:
-                        log.info(
-                            f"Current weather with last_updated_epoch {current_weather.last_updated_epoch} already exists, skipping insert"
-                        )
-                        db_current_weather = existing_weather
-                    else:
-                        ## Set the location_id in weather_data dict
-                        weather_data = current_weather.model_dump(
-                            exclude={"condition", "air_quality"}
-                        )
-                        weather_data["location_id"] = db_location.id
-                        condition_data = current_weather.condition.model_dump()
-                        air_qual_data = (
-                            current_weather.air_quality.model_dump()
-                            if current_weather.air_quality
-                            else {}
-                        )
-
-                        try:
-                            db_current_weather = (
-                                current_weather_repo.create_with_related(
-                                    weather_data=weather_data,
-                                    condition_data=condition_data,
-                                    air_quality_data=air_qual_data,
-                                )
-                            )
-                            log.debug(
-                                f"Saved current weather with id {db_current_weather.id}"
-                            )
-                        except Exception as exc:
-                            log.error(f"Error saving current weather: {exc}")
-                            raise HTTPException(
-                                status_code=400, detail="Error saving current weather"
-                            )
-
+                ## Invalid collector data label
                 case _:
                     log.error(f"Invalid label: {payload.label}")
                     raise HTTPException(status_code=400, detail="Invalid label")
 
+        ## Invalid collector
         case _:
             log.error(f"Invalid source: {payload.source}")
             raise HTTPException(status_code=400, detail="Invalid source")
-
-    return {
-        "weather_id": db_current_weather.id,
-        "message": "Current weather data saved successfully",
-    }
