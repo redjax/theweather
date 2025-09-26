@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import typing as t
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -157,6 +158,23 @@ def create_base_metadata(
         raise ValueError("engine cannot be None")
     if not isinstance(engine, sa.Engine):
         raise TypeError(f"engine must be sqlalchemy.Engine. Got {type(engine)}")
+
+    if engine.url.drivername.startswith("sqlite") and engine.url.database not in (
+        None,
+        "",
+        ":memory:",
+    ):
+        db_path: Path = Path(engine.url.database).resolve()
+        parent_dir = db_path.parent
+
+        if not parent_dir.exists():
+            try:
+                parent_dir.mkdir(parents=True, exist_ok=True)
+            except Exception as exc:
+                log.error(
+                    f"Failed creating SQLite database parent directory: ({type(exc)}) {exc}"
+                )
+                raise
 
     try:
         if tables:
