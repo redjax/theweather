@@ -1,0 +1,54 @@
+---
+
+services:
+  api-server:
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: containers/api_server/Dockerfile
+    working_dir: /app/api-server
+    container_name: api-server
+    command: ["python3", "-m", "api_server"]
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      
+      DYNACONF_LOGGING__LOG_LEVEL: ${API_SERVER_LOG_LEVEL:-INFO}
+      DYNACONF_LOGGING__LOG_FILE_PATH: ${API_SERVER_LOG_FILE_PATH:-/var/log/weatherapi-collector/app.log}
+
+      DYNACONF_DATABASE__DB_TYPE: ${API_SERVER_DB_TYPE:-sqlite}
+      DYNACONF_DATABASE__DB_DRIVERNAME: ${API_SERVER_DB_DRIVERNAME:-sqlite+pysqlite}
+      DYNACONF_DATABASE__DB_USERNAME: ${API_SERVER_DB_USERNAME}
+      DYNACONF_DATABASE__DB_PASSWORD: ${API_SERVER_DB_PASSWORD}
+      DYNACONF_DATABASE__DB_HOST: ${API_SERVER_DB_HOST}
+      DYNACONF_DATABASE__DB_PORT: ${API_SERVER_DB_PORT}
+      DYNACONF_DATABASE__DB_DATABASE: ${API_SERVER_DB_DATABASE:-/app/.db/weatherapi-collector.db}
+      DYNACONF_DATABASE__DB_ECHO: ${API_SERVER_DB_ECHO:-false}
+
+      DYNACONF_FASTAPI__DEBUG: ${API_SERVER_FASTAPI_DEBUG:-false}
+      DYNACONF_FASTAPI__CORS: ${API_SERVER_FASTAPI_CORS:-true}
+      DYNACONF_FASTAPI__ROOT_PATH: ${API_SERVER_FASTAPI_ROOT_PATH:-/}
+      DYNACONF_FASTAPI__TITLE: ${API_SERVER_FASTAPI_TITLE:-"TheWeather API"}
+      DYNACONF_FASTAPI__DESCRIPTION: ${API_SERVER_FASTAPI_DESCRIPTION:-"Central server for receiving weather metrics retrieved by the collectors."}
+      DYNACONF_FASTAPI__VERSION: ${API_SERVER_FASTAPI_VERSION:-"0.1.0"}
+      DYNACONF_FASTAPI__OPENAPI_URL: ${API_SERVER_FASTAPI_OPENAPI_URL:-/openapi.json}
+      DYNACONF_FASTAPI__REDIRECT_SLASHES: ${API_SERVER_FASTAPI_REDIRECT_SLASHES:-true}
+      DYNACONF_FASTAPI__DOCS_URL: ${API_SERVER_FASTAPI_DOCS_URL:-/docs}
+      DYNACONF_FASTAPI__REDOC_URL: ${API_SERVER_FASTAPI_REDOC_URL:-/redoc}
+      DYNACONF_FASTAPI__OPENAPI_PREFIX: ${API_SERVER_FASTAPI_OPENAPI_PREFIX}
+      DYNACONF_FASTAPI__ROOT_PATH_IN_SERVERS: ${API_SERVER_FASTAPI_ROOT_PATH_IN_SERVERS:-true}
+      DYNACONF_FASTAPI__INCLUDE_ADMIN_ROUTER: ${API_SERVER_FASTAPI_INCLUDE_ADMIN_ROUTER:-false}
+
+      DYNACONF_UVICORN__APP: "api_server.main:app"
+      DYNACONF_UVICORN__HOST: ${API_SERVER_UVICORN_HOST:-"0.0.0.0"}
+      DYNACONF_UVICORN__PORT: 8000
+      DYNACONF_UVICORN__ROOT_PATH: ${API_SERVER_UVICORN_ROOT_PATH:-/}
+      DYNACONF_UVICORN__RELOAD: ${API_SERVER_UVICORN_RELOAD:-false}
+      DYNACONF_UVICORN__LOG_LEVEL: ${API_SERVER_UVICORN_LOG_LEVEL:-INFO}
+      DYNACONF_UVICORN__WORKERS: ${API_SERVER_UVICORN_WORKERS:-1}
+    volumes:
+      - ../../shared/src:/app/shared/src:ro
+      - ../../servers/api-server/src:/app/api-server/src:ro
+      - ${API_SERVER_LOGS_DIR:-api_server_logs}:/var/log/api-server
+      - ${API_SERVER_DB_DIR:-api_server_db}:/app/.db
+    ports:
+      - ${API_SERVER_UVICORN_PORT:-8000}:8000
