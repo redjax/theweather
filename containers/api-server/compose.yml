@@ -1,4 +1,7 @@
 ---
+volumes:
+  api_server_logs: {}
+  api_server_db: {}
 
 services:
   api-server:
@@ -52,3 +55,9 @@ services:
       - ${API_SERVER_DB_DIR:-api_server_db}:/app/.db
     ports:
       - ${API_SERVER_UVICORN_PORT:-8000}:8000
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

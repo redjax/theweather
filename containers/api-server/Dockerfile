@@ -4,8 +4,11 @@ FROM python:3.12-slim AS base
 WORKDIR /app
 
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends gcc build-essential && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+        gcc \
+        build-essential \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
 
