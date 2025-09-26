@@ -1,29 +1,24 @@
 from shared.domain.collectors.payloads import WeatherCollectorPayloadIn
 from shared.domain.weatherapi.weather import (
     CurrentWeatherJSONIn,
-    CurrentWeatherJSONOut,
     CurrentWeatherJSONModel,
     CurrentWeatherJSONRepository,
     CurrentWeatherIn,
-    CurrentWeatherOut,
     CurrentWeatherModel,
     CurrentWeatherRepository,
-    ForecastJSONIn,
-    ForecastJSONOut,
-    ForecastJSONModel,
-    ForecastJSONRepository,
 )
 from shared.domain.weatherapi.location import (
     LocationIn,
-    LocationOut,
     LocationModel,
     LocationRepository,
 )
 from api_server.depends import get_db
 
+
 from loguru import logger as log
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
+
 
 __all__ = ["router"]
 
@@ -41,124 +36,99 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
         f"Received: [source: {payload.source}] | [label: {payload.label}] | {payload.data}"
     )
 
-    ## Determine what to do with incoming data based on source
     match payload.source:
-
-        ## WeatherAPI
         case "weatherapi":
-
-            ## Determine data type
             match payload.label:
-
-                ## Current weather
                 case "current":
                     log.info(f"Received current weather from collector")
 
-                    ## Current weather raw JSON schema
-                    raw_json: CurrentWeatherJSONIn = CurrentWeatherJSONIn(
-                        current_weather_json=payload.data
-                    )
-                    # log.debug(f"Current weather JSON object: {current_weather_json}")
+                    ## Raw JSON response schema
+                    raw_json = CurrentWeatherJSONIn(current_weather_json=payload.data)
 
                     ## Location schema
-                    location: LocationIn = LocationIn.model_validate(
-                        payload.data["location"]
-                    )
-                    log.debug(f"Location object: {location}")
-
+                    location = LocationIn.model_validate(payload.data["location"])
                     ## Current weather schema
-                    current_weather: CurrentWeatherIn = CurrentWeatherIn.model_validate(
+                    current_weather = CurrentWeatherIn.model_validate(
                         payload.data["current"]
                     )
-                    log.debug(f"Current weather object: {current_weather}")
 
-                    ## Current weather raw JSON model
-                    current_weather_json_model: CurrentWeatherJSONModel = (
-                        CurrentWeatherJSONModel(
-                            current_weather_json=raw_json.current_weather_json
-                        )
-                    )
+                    ## Build DB models
+                    location_model = LocationModel(**location.model_dump())
+                    current_weather_model = current_weather.to_orm()
 
-                    ## Location DB model
-                    location_model: LocationModel = LocationModel(
-                        **location.model_dump()
-                    )
-                    log.debug(f"Location model: {location_model.__dict__}")
-
-                    ## Current weather DB model
-                    current_weather_model: CurrentWeatherModel = (
-                        current_weather.to_orm()
-                    )
-
-                    log.debug(
-                        f"Current weather model: {current_weather_model.__dict__}"
-                    )
-
-                    ## Create DB repos
-                    log.info(f"Saving location & current weather to database")
-                    current_weather_json_repository = CurrentWeatherJSONRepository(db)
-                    location_repository = LocationRepository(db)
-                    current_weather_repository = CurrentWeatherRepository(db)
+                    ## Initialize repositories
+                    current_weather_json_repo = CurrentWeatherJSONRepository(db)
+                    location_repo = LocationRepository(db)
+                    current_weather_repo = CurrentWeatherRepository(db)
 
                     ## Save raw JSON
-                    log.debug(f"Save current weather JSON")
                     try:
-                        db_current_weather_json: CurrentWeatherJSONModel = (
-                            current_weather_json_repository.create(
-                                current_weather_json_model
+                        db_current_weather_json = current_weather_json_repo.create(
+                            current_weather_json_model := CurrentWeatherJSONModel(
+                                current_weather_json=raw_json.current_weather_json
                             )
                         )
+                        log.debug("Saved raw current weather JSON")
                     except Exception as exc:
                         log.error(f"Error saving current weather JSON: {exc}")
                         raise HTTPException(
                             status_code=400, detail="Error saving current weather JSON"
                         )
 
-                    ## Save location
-                    log.debug(f"Save location")
+                    ## Check if Location exists, else save
                     try:
-                        db_location: LocationModel = location_repository.save(
-                            location_model
+                        db_location = location_repo.get_by_name_country_and_region(
+                            location_model.name,
+                            location_model.region,
+                            location_model.country,
                         )
+                        if not db_location:
+                            db_location = location_repo.save(location_model)
+                        log.debug(f"Using location id: {db_location.id}")
                     except Exception as exc:
                         log.error(f"Error saving location: {exc}")
                         raise HTTPException(
                             status_code=400, detail="Error saving location"
                         )
 
-                    ## Save current weather
-
-                    ## Extract location ID from saved model
-                    current_weather_model.location_id = db_location.id
-
-                    ## Extract dicts of weather, condition, & air quality data
-                    weather_data: dict = current_weather.model_dump(
-                        exclude={"condition", "air_quality"}
+                    ## Check if current weather already exists for last_updated_epoch, skip insert if so
+                    existing_weather = current_weather_repo.get_by_last_updated_epoch(
+                        current_weather.last_updated_epoch
                     )
-                    condition_data: dict = current_weather.condition.model_dump()
-                    air_qual_data: dict = (
-                        current_weather.air_quality.model_dump()
-                        if current_weather.air_quality
-                        else {}
-                    )
+                    if existing_weather:
+                        log.info(
+                            f"Current weather with last_updated_epoch {current_weather.last_updated_epoch} already exists, skipping insert"
+                        )
+                        db_current_weather = existing_weather
+                    else:
+                        ## Set the location_id in weather_data dict
+                        weather_data = current_weather.model_dump(
+                            exclude={"condition", "air_quality"}
+                        )
+                        weather_data["location_id"] = db_location.id
+                        condition_data = current_weather.condition.model_dump()
+                        air_qual_data = (
+                            current_weather.air_quality.model_dump()
+                            if current_weather.air_quality
+                            else {}
+                        )
 
-                    ## Set location of current weather reading
-                    weather_data["location_id"] = db_location.id
-
-                    log.debug(f"Save current weather")
-                    try:
-                        db_current_weather: CurrentWeatherModel = (
-                            current_weather_repository.create_with_related(
-                                weather_data=weather_data,
-                                condition_data=condition_data,
-                                air_quality_data=air_qual_data,
+                        try:
+                            db_current_weather = (
+                                current_weather_repo.create_with_related(
+                                    weather_data=weather_data,
+                                    condition_data=condition_data,
+                                    air_quality_data=air_qual_data,
+                                )
                             )
-                        )
-                    except Exception as exc:
-                        log.error(f"Error saving current weather: {exc}")
-                        raise HTTPException(
-                            status_code=400, detail="Error saving current weather"
-                        )
+                            log.debug(
+                                f"Saved current weather with id {db_current_weather.id}"
+                            )
+                        except Exception as exc:
+                            log.error(f"Error saving current weather: {exc}")
+                            raise HTTPException(
+                                status_code=400, detail="Error saving current weather"
+                            )
 
                 case _:
                     log.error(f"Invalid label: {payload.label}")
