@@ -1,0 +1,44 @@
+---
+volumes:
+  postgres_data: {}
+
+networks:
+  theweather_api_net: {}
+
+services:
+
+  postgres:
+    image: postgres:${POSTGRES_IMAGE_TAG:-bullseye}
+    container_name: ${POSTGRES_CONTAINER_NAME:-postgres}
+    restart: unless-stopped
+    user: ${POSTGRES_USER:-postgres}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      # Read section on this variable in docker docs before setting:
+      #   https://hub.docker.com/_/postgres/
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
+    expose:
+      - 5432
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - ${POSTGRES_DATA_DIR:-postgres_data}:/var/lib/postgresql/data
+      # Mount directory with init scripts for docker, i.e. install UUID extension
+      - ../entrypoints/pg_entrypoint:/docker-entrypoint-initdb.d/
+      # Mount directory to store SQL scripts
+      - ${POSTGRES_SCRIPTS_DIR:-./pgsql_scripts}:/scripts
+      # Uncomment line below to restore a database backup.
+      # - ${POSTGRES_DB_BACKUP}:/path/here
+    networks:
+      - theweather_api_net
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  api-server:
+    networks:
+      - theweather_api_net

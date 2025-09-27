@@ -1,0 +1,21 @@
+---
+volumes:
+  redis_data: {}
+
+services:
+  redis:
+    image: redis
+    container_name: ${REDIS_CONTAINER_NAME:-redis}
+    restart: unless-stopped
+    command: redis-server --save 20 1 --loglevel verbose
+    volumes:
+      - ${REDIS_CACHE_DIR:-redis_data}:/data
+    expose:
+      - 6379
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
