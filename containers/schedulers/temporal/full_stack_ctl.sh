@@ -107,10 +107,25 @@ echo ""
 "${cmd[@]}"
 if [[ $? -ne 0 ]]; then
   echo ""
+
+  if [[ "$START_STACK" == "true" ]]; then
+    echo "[ERROR] Temporal stack failed to start."
+  elif [[ "$STOP_STACK" == "true" ]]; then
+    echo "[ERROR] Temporal stack failed to stop."
+  elif [[ "$RESTART_STACK" == "true" ]]; then
+    echo "[ERROR] Temporal stack failed to restart."
+  fi
   echo "[ERROR] Failed to start Temporal stack."
   exit $?
 else
   echo ""
-  echo "Temporal stack started successfully."
+  if [[ "$START_STACK" == "true" ]]; then
+    echo "Temporal stack started successfully."
+  elif [[ "$STOP_STACK" == "true" ]]; then
+    echo "Temporal stack stopped successfully."
+  elif [[ "$RESTART_STACK" == "true" ]]; then
+    echo "Temporal stack restarted successfully."
+  fi
+
   exit 0
 fi
