@@ -3,7 +3,7 @@ volumes:
   pgbackweb_data: {}
 
 networks:
-  pg_net: {}
+  theweather_api_net: {}
 
 services:
   pgbackweb:
@@ -23,9 +23,8 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - pg_net
+      - theweather_api_net
 
-  postgres:
+  api-server:
     networks:
-      - pg_net
-
+      - theweather_api_net

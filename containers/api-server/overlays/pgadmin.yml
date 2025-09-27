@@ -3,7 +3,7 @@ volumes:
   pgadmin_data: {}
 
 networks:
-  pg_net: {}
+  theweather_api_net: {}
 
 services:
 
@@ -22,9 +22,8 @@ services:
     depends_on:
       - postgres
     networks:
-      - pg_net
+      - theweather_api_net
 
-  postgres:
+  api-server:
     networks:
-      - pg_net
-
+      - theweather_api_net

@@ -2,6 +2,9 @@
 volumes:
   redis_data: {}
 
+networks:
+  theweather_api_net: {}
+
 services:
   redis:
     image: redis
@@ -14,8 +17,14 @@ services:
       - 6379
     ports:
       - ${REDIS_PORT:-6379}:6379
+    networks:
+      - theweather_api_net
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 1s
       timeout: 3s
       retries: 5
+
+  api-server:
+    networks:
+      - theweather_api_net

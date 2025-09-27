@@ -2,6 +2,9 @@
 volumes:
   postgres_data: {}
 
+networks:
+  theweather_api_net: {}
+
 services:
 
   postgres:
@@ -27,6 +30,8 @@ services:
       - ${POSTGRES_SCRIPTS_DIR:-./pgsql_scripts}:/scripts
       # Uncomment line below to restore a database backup.
       # - ${POSTGRES_DB_BACKUP}:/path/here
+    networks:
+      - theweather_api_net
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
@@ -34,3 +39,6 @@ services:
       timeout: 5s
       retries: 10
 
+  api-server:
+    networks:
+      - theweather_api_net

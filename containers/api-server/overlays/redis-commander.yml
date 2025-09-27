@@ -1,6 +1,6 @@
 ---
 networks:
-  redis_net: {}
+  theweather_api_net: {}
 
 services:
   redis-commander:
@@ -13,8 +13,8 @@ services:
     ports:
       - ${REDIS_COMMANDER_PORT:-8081}:8081
     networks:
-      - redis_net
+      - theweather_api_net
 
-  redis:
+  api-server:
     networks:
-      - redis_net
+      - theweather_api_net

@@ -2,6 +2,9 @@
 volumes:
   mariadb_data: {}
 
+networks:
+  theweather_api_net: {}
+
 services:
   mariadb:
     image: mariadb
@@ -18,3 +21,7 @@ services:
       - ${MYSQL_SCRIPT_INIT_DIR:-./data/docker-entrypoint}:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_DB_PORT:-3306}:3306"
+
+  api-server:
+    networks:
+      - theweather_api_net
