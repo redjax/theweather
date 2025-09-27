@@ -1,0 +1,11 @@
+dynaconf_merge = true
+
+[temporal]
+host = "localhost"
+port = 7233
+namespace = "default"
+
+[weatherapi]
+location_name = "Cleveland"
+run_scheduler = false
+save_to_db = false
