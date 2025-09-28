@@ -5,7 +5,9 @@ from shared.domain.weatherapi.weather import CurrentWeatherJSONIn, ForecastJSONI
 
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
 from weatherapi_collector import client as weatherapi_client
-from weatherapi_collector.scheduled import start_weatherapi_scheduled_collection
+from weatherapi_collector.schedules.schedule_lib import (
+    start_weatherapi_scheduled_collection,
+)
 from weatherapi_collector import db_client
 from weatherapi_collector.depends import get_db_engine
 from weatherapi_collector.db_init import initialize_database
@@ -49,24 +51,36 @@ def collect(location_name: str | None = None, forecast_days: int = 1) -> dict:
     return {"current_weather": current_weather, "weather_forecast": weather_forecast}
 
 
-def main(
-    start_scheduled: bool = False,
-    minutes_schedule: list[str] = ["00", "15", "30", "45"],
-    save_to_db: bool = False,
-    db_echo: bool = False,
-    db_engine: t.Optional[sa.Engine] = None,
-):
+def main():
+    SCHEDULE_MINUTES_LIST = ["00", "15", "30", "45"]
+    RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER")
+    SAVE_TO_DB: bool = WEATHERAPI_SETTINGS.get("SAVE_TO_DB")
+    DB_ECHO: bool = WEATHERAPI_SETTINGS.get("DB_ECHO")
+    log.debug(f"Running on schedule: {RUN_SCHEDULE}")
+    log.debug(f"Save responses to DB: {SAVE_TO_DB}, DB echo: {DB_ECHO}")
+
+    initialize_database()
+
+    ## Temporarily add minute(s) to list
+    # SCHEDULE_MINUTES_LIST.append("16")
+
+    ## Initialize database engine
+    db_engine = None
+    if SAVE_TO_DB:
+        db_engine = get_db_engine()
+
+    log.debug(f"Start scheduler: {RUN_SCHEDULE}")
     location_name: str = WEATHERAPI_SETTINGS.get("LOCATION_NAME")
     forecast_days: int = 1
 
-    if start_scheduled:
+    if RUN_SCHEDULE:
         start_weatherapi_scheduled_collection(
             location_name=location_name,
             api_key=WEATHERAPI_SETTINGS.get("API_KEY"),
             forecast_days=forecast_days,
-            save_to_db=save_to_db,
-            db_echo=db_echo,
-            minutes_schedule=minutes_schedule,
+            save_to_db=SAVE_TO_DB,
+            db_echo=DB_ECHO,
+            minutes_schedule=SCHEDULE_MINUTES_LIST,
             db_engine=db_engine,
         )
 
@@ -75,7 +89,7 @@ def main(
         try:
             collected_weatherapi_results: dict = collect(location_name, forecast_days)
 
-            if save_to_db:
+            if SAVE_TO_DB:
                 _current = CurrentWeatherJSONIn(
                     collected_weatherapi_results.get("current_weather")
                 )
@@ -113,31 +127,8 @@ def main(
 if __name__ == "__main__":
     setup_loguru_logging()
 
-    SCHEDULE_MINUTES_LIST = ["00", "15", "30", "45"]
-    RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER")
-    SAVE_TO_DB: bool = WEATHERAPI_SETTINGS.get("SAVE_TO_DB")
-    DB_ECHO: bool = WEATHERAPI_SETTINGS.get("DB_ECHO")
-    log.debug(f"Running on schedule: {RUN_SCHEDULE}")
-    log.debug(f"Save responses to DB: {SAVE_TO_DB}, DB echo: {DB_ECHO}")
-
-    initialize_database()
-
-    ## Temporarily add minute(s) to list
-    # SCHEDULE_MINUTES_LIST.append("16")
-
-    ## Initialize database engine
-    db_engine = None
-    if SAVE_TO_DB:
-        db_engine = get_db_engine()
-
     try:
-        main(
-            start_scheduled=RUN_SCHEDULE,
-            save_to_db=SAVE_TO_DB,
-            db_echo=DB_ECHO,
-            minutes_schedule=SCHEDULE_MINUTES_LIST,
-            db_engine=db_engine,
-        )
+        main()
     except Exception as exc:
         log.error(f"({type(exc)}) Failed to run WeatherAPI collector: {exc}")
         exit(1)
