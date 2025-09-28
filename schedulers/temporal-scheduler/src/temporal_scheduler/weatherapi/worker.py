@@ -17,6 +17,7 @@ from temporal_scheduler.weatherapi.activities import (
     poll_weather_forecast,
 )
 from temporal_scheduler.config._settings import TEMPORAL_SETTINGS
+from temporal_scheduler.constants import ALLOWED_LIBS
 
 from loguru import logger as log
 
@@ -34,7 +35,7 @@ async def main():
     # Add your modules as passthrough -- include any that transitively cause errors
     # E.g., dynaconf, ruamel.yaml, weatherapi_collector, etc.
     my_restrictions = SandboxRestrictions.default.with_passthrough_modules(
-        "dynaconf", "shared", "loguru", "datetime"
+        *ALLOWED_LIBS
     )
 
     worker = Worker(
