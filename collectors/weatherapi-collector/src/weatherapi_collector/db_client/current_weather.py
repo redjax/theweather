@@ -30,6 +30,7 @@ __all__ = [
     "count_current_weather_responses",
     "get_all_current_weather_responses",
     "set_current_weather_response_retention",
+    "vacuum_current_weather",
 ]
 
 
@@ -250,3 +251,57 @@ def set_current_weather_response_retention(
         log.debug(f"Updated current weather entry ID {item_id} to retain={retain}.")
 
         return True
+
+
+def vacuum_current_weather(echo: bool = False):
+    """Remove records that are marked retain=False from the database.
+
+    Params:
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False
+    """
+    SessionLocal = _get_session_pool(echo=echo)
+
+    _deleted = []
+    _errored = []
+
+    with SessionLocal() as session:
+        repo = CurrentWeatherJSONCollectorRepository(session=session)
+
+        all_current_weather_items = repo.list() or []
+
+        if not all_current_weather_items:
+            log.warning("No current weather items found in database, skipping vacuum.")
+            return
+
+        log.debug(
+            f"Reviewing [{len(all_current_weather_items)}] current weather items for deletion."
+        )
+
+        for item in all_current_weather_items:
+            if not item.retain:
+                log.info(
+                    f"Deleting current weather item ID {item.id} (retain={item.retain})."
+                )
+
+                try:
+                    repo.delete(item)
+
+                    _deleted.append(item.id)
+                except Exception as exc:
+                    log.error(
+                        f"({type(exc)}) Error deleting current weather item ID {item.id}. Details: {exc}"
+                    )
+
+                    _errored.append(item.id)
+                    continue
+
+            else:
+                log.debug(
+                    f"Retaining current weather item ID {item.id} (retain={item.retain})."
+                )
+
+    log.info(
+        f"Vacuum complete. Deleted {_deleted} ({len(_deleted)} items). Errors deleting ({len(_errored)} items)."
+    )
+
+    return _deleted
