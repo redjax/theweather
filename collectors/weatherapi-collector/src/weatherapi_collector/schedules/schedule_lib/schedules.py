@@ -128,8 +128,7 @@ def start_weatherapi_scheduled_collection(
 [ Job schedules (in minutes) ]
   - WeatherAPI jobs (request weather): {weatherapi_jobs_minutes_schedule}
   - Data jobs (POST weather readings): {data_jobs_minutes_schedule}
-  - Cleanup jobs (vacuum db): {cleanup_jobs_minutes_schedule}
-"""
+  - Cleanup jobs (vacuum db): {cleanup_jobs_minutes_schedule}"""
     )
 
     try:
