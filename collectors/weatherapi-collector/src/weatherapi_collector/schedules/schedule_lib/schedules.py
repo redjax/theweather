@@ -15,6 +15,7 @@ from .jobs import (
     job_weatherapi_current_weather,
     job_weatherapi_weather_forecast,
     job_post_weather_readings,
+    job_vacuum_current_weather_json_responses,
 )
 
 import sqlalchemy as sa
@@ -68,6 +69,16 @@ def add_data_schedules(
         )
 
 
+def add_cleanup_schedules(
+    db_echo: bool = False,
+    minutes_schedule: list[str] = ["00"],
+):
+    for minute in minutes_schedule:
+        schedule.every().hour.at(f":{minute}").do(
+            job_vacuum_current_weather_json_responses, echo=db_echo
+        )
+
+
 def start_weatherapi_scheduled_collection(
     location_name: str,
     api_key: str,
@@ -102,6 +113,32 @@ def start_weatherapi_scheduled_collection(
             "45",
             "50",
             "55",
+        ],
+    )
+
+    add_cleanup_schedules(
+        db_echo=db_echo,
+        minutes_schedule=[
+            "01",
+            "03",
+            "05",
+            "07",
+            "09",
+            "11",
+            "13",
+            "15",
+            "17",
+            "19",
+            "21",
+            "23",
+            "25",
+            "27",
+            "29",
+            "31",
+            "33",
+            "35",
+            "37",
+            "39",
         ],
     )
 

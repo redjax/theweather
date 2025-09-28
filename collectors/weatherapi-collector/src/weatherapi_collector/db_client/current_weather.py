@@ -30,7 +30,7 @@ __all__ = [
     "count_current_weather_responses",
     "get_all_current_weather_responses",
     "set_current_weather_response_retention",
-    "vacuum_current_weather",
+    "vacuum_current_weather_json_responses",
 ]
 
 
@@ -253,7 +253,7 @@ def set_current_weather_response_retention(
         return True
 
 
-def vacuum_current_weather(echo: bool = False):
+def vacuum_current_weather_json_responses(echo: bool = False):
     """Remove records that are marked retain=False from the database.
 
     Params:
