@@ -85,7 +85,22 @@ def start_weatherapi_scheduled_collection(
     forecast_days: int = 1,
     save_to_db: bool = False,
     db_echo: bool = False,
-    minutes_schedule: list[str] = ["00", "15", "30", "45"],
+    weatherapi_jobs_minutes_schedule: list[str] = ["00", "15", "30", "45"],
+    data_jobs_minutes_schedule: list[str] = ["00", "20", "40"],
+    cleanup_jobs_minutes_schedule: list[str] = [
+        "00",
+        "05",
+        "10",
+        "15",
+        "20",
+        "25",
+        "30",
+        "35",
+        "40",
+        "45",
+        "50",
+        "55",
+    ],
     db_engine: t.Optional[sa.Engine] = None,
 ):
     add_weatherapi_schedules(
@@ -95,56 +110,28 @@ def start_weatherapi_scheduled_collection(
         save_to_db=save_to_db,
         db_echo=db_echo,
         db_engine=db_engine,
-        minutes_schedule=minutes_schedule,
+        minutes_schedule=weatherapi_jobs_minutes_schedule,
     )
 
-    add_data_schedules(
-        db_echo=db_echo,
-        minutes_schedule=[
-            "00",
-            "05",
-            "10",
-            "15",
-            "20",
-            "25",
-            "30",
-            "35",
-            "40",
-            "45",
-            "50",
-            "55",
-        ],
-    )
+    add_data_schedules(db_echo=db_echo, minutes_schedule=data_jobs_minutes_schedule)
 
     add_cleanup_schedules(
         db_echo=db_echo,
-        minutes_schedule=[
-            "01",
-            "03",
-            "05",
-            "07",
-            "09",
-            "11",
-            "13",
-            "15",
-            "17",
-            "19",
-            "21",
-            "23",
-            "25",
-            "27",
-            "29",
-            "31",
-            "33",
-            "35",
-            "37",
-            "39",
-        ],
+        minutes_schedule=cleanup_jobs_minutes_schedule,
     )
 
-    log.info(
-        f"Starting scheduler loop (minutes where schedule will run: {minutes_schedule})"
+    log.info(f"Starting scheduler loop")
+
+    log.debug(
+        f"""DEBUG JOB SCHEDULES
+
+[ Job schedules (in minutes) ]
+  - WeatherAPI jobs (request weather): {weatherapi_jobs_minutes_schedule}
+  - Data jobs (POST weather readings): {data_jobs_minutes_schedule}
+  - Cleanup jobs (vacuum db): {cleanup_jobs_minutes_schedule}
+"""
     )
+
     try:
         while True:
             schedule.run_pending()

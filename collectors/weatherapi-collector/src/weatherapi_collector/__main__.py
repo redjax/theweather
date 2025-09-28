@@ -52,7 +52,23 @@ def collect(location_name: str | None = None, forecast_days: int = 1) -> dict:
 
 
 def main():
-    SCHEDULE_MINUTES_LIST = ["00", "15", "30", "45"]
+    WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST = ["00", "15", "30", "45"]
+    DATA_JOBS_SCHEDULE_MINUTES_LIST: list[str] = ["00", "20", "40"]
+    CLEANUP_JOBS_SCHEDULE_MINUTES_LIST: list[str] = [
+        "00",
+        "05",
+        "10",
+        "15",
+        "20",
+        "25",
+        "30",
+        "35",
+        "40",
+        "45",
+        "50",
+        "55",
+    ]
+
     RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER")
     SAVE_TO_DB: bool = WEATHERAPI_SETTINGS.get("SAVE_TO_DB")
     DB_ECHO: bool = WEATHERAPI_SETTINGS.get("DB_ECHO")
@@ -61,8 +77,33 @@ def main():
 
     initialize_database()
 
-    ## Temporarily add minute(s) to list
-    # SCHEDULE_MINUTES_LIST.append("16")
+    ## Override schedules (for debugging/dev)
+    SCHEDULE_OVERRIDES = {
+        "WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST": [],
+        "DATA_JOBS_SCHEDULE_MINUTES_LIST": [],
+        "CLEANUP_JOBS_SCHEDULE_MINUTES_LIST": [],
+    }
+
+    ## Override weather api jobs schedule
+    if SCHEDULE_OVERRIDES.get("WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST"):
+        WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST = (
+            WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST
+            + SCHEDULE_OVERRIDES.get("WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST")
+        )
+
+    ## Override data jobs schedule
+    if SCHEDULE_OVERRIDES.get("DATA_JOBS_SCHEDULE_MINUTES_LIST"):
+        DATA_JOBS_SCHEDULE_MINUTES_LIST = (
+            DATA_JOBS_SCHEDULE_MINUTES_LIST
+            + SCHEDULE_OVERRIDES.get("DATA_JOBS_SCHEDULE_MINUTES_LIST")
+        )
+
+    ## Override cleanup jobs schedule
+    if SCHEDULE_OVERRIDES.get("CLEANUP_JOBS_SCHEDULE_MINUTES_LIST"):
+        CLEANUP_JOBS_SCHEDULE_MINUTES_LIST = (
+            CLEANUP_JOBS_SCHEDULE_MINUTES_LIST
+            + SCHEDULE_OVERRIDES.get("CLEANUP_JOBS_SCHEDULE_MINUTES_LIST")
+        )
 
     ## Initialize database engine
     db_engine = None
@@ -80,7 +121,9 @@ def main():
             forecast_days=forecast_days,
             save_to_db=SAVE_TO_DB,
             db_echo=DB_ECHO,
-            minutes_schedule=SCHEDULE_MINUTES_LIST,
+            weatherapi_jobs_minutes_schedule=WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST,
+            data_jobs_minutes_schedule=DATA_JOBS_SCHEDULE_MINUTES_LIST,
+            cleanup_jobs_minutes_schedule=CLEANUP_JOBS_SCHEDULE_MINUTES_LIST,
             db_engine=db_engine,
         )
 
