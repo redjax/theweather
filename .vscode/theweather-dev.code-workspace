@@ -35,6 +35,10 @@
 		{
 			"path": "../collectors/openmeteo-collector/",
 			"name": "OpenMeteo Collector"
+		},
+		{
+			"path": "../schedulers/temporal-scheduler/",
+			"name": "Temporal Scheduler"
 		}
 	]
 }
