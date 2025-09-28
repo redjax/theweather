@@ -4,13 +4,10 @@ import time
 
 from shared import http_lib
 
-from weatherapi_collector.depends import db_depends
 from weatherapi_collector.db_client.current_weather import (
-    save_current_weather,
     save_current_weather_response,
 )
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
-from weatherapi_collector.constants import WEATHERAPI_BASE_URL
 from weatherapi_collector.convert.methods import (
     current_weather_dict_to_schema,
     current_weather_response_dict_to_schema,
@@ -40,7 +37,6 @@ def get_current_weather(
     retry_sleep: int = 5,
     retry_stagger: int = 3,
     save_to_db: bool = False,
-    db_engine: sa.Engine | None = None,
     db_echo: bool = False,
 ) -> dict | None:
     """Get the current weather for a location.
@@ -131,9 +127,6 @@ def get_current_weather(
         return None
 
     if save_to_db:
-        if not db_engine:
-            db_engine = db_depends.get_db_engine()
-
         # log.warning("Saving current weather to database is not implemented")
         errored: bool = False
 
@@ -152,7 +145,6 @@ def get_current_weather(
             try:
                 save_current_weather_response(
                     current_weather_schema=db_current_weather_json,
-                    engine=db_engine,
                     echo=db_echo,
                 )
             except Exception as exc:
@@ -168,14 +160,6 @@ def get_current_weather(
 
             return decoded
 
-        try:
-            db_location_in = location_dict_to_schema(location_dict=decoded["location"])
-        except Exception as exc:
-            msg = f"({type(exc)}) Error converting decoded response to schema. Details: {exc}"
-            log.error(msg)
-
-            errored = True
-
         if not errored:
             try:
                 db_current_weather_in = current_weather_dict_to_schema(
@@ -190,10 +174,8 @@ def get_current_weather(
         if not errored:
             ## Save current weather to database
             try:
-                db_current_weather_out = save_current_weather(
-                    location=db_location_in,
+                db_current_weather_out = save_current_weather_response(
                     current_weather=db_current_weather_in,
-                    engine=db_engine,
                     echo=db_echo,
                 )
                 log.success("Saved current weather to database")

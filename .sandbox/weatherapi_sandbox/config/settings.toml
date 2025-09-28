@@ -1,6 +1,0 @@
-dynaconf_merge = true
-
-[weatherapi]
-location_name = "London"
-run_scheduler = false
-save_to_db = false

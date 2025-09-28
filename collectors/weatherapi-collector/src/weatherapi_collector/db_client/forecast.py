@@ -3,13 +3,17 @@ from __future__ import annotations
 import json
 import typing as t
 
-from shared import db
-from weatherapi_collector.depends import db_depends
+from weatherapi_collector.config import DB_SETTINGS
 from weatherapi_collector.domain import (
     ForecastJSONCollectorModel,
     ForecastJSONCollectorOut,
     ForecastJSONCollectorRepository,
     ForecastJSONCollectorIn,
+)
+from weatherapi_collector.db_client.__methods import (
+    get_db_engine,
+    get_db_uri,
+    get_session_pool,
 )
 from loguru import logger as log
 
@@ -25,9 +29,74 @@ __all__ = [
 ]
 
 
+def _get_engine(echo: bool = False) -> sa.Engine:
+    """Get a SQLAlchemy engine using the default DB settings.
+
+    Params:
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
+
+    Returns:
+        sa.Engine: A SQLAlchemy engine.
+
+    Raises:
+        Exception: If there is an error creating the engine, an `Exception` is raised.
+
+    """
+    try:
+        db_uri = get_db_uri(
+            drivername=DB_SETTINGS.get("db_drivername"),
+            username=DB_SETTINGS.get("db_username"),
+            password=DB_SETTINGS.get("db_password"),
+            host=DB_SETTINGS.get("db_host"),
+            port=DB_SETTINGS.get("db_port"),
+            database=DB_SETTINGS.get("db_database"),
+        )
+    except Exception as exc:
+        msg = f"({type(exc)}) Error constructing database URI. Details: {exc}"
+        log.error(msg)
+
+        raise exc
+
+    try:
+        engine = get_db_engine(db_uri=db_uri, echo=echo)
+    except Exception as exc:
+        msg = f"({type(exc)}) Error creating database engine. Details: {exc}"
+        log.error(msg)
+
+        raise exc
+
+    return engine
+
+
+def _get_session_pool(echo: bool = False) -> so.sessionmaker[so.Session]:
+    """Get a SQLAlchemy session pool using the provided engine.
+
+    Params:
+        engine (sa.Engine): A SQLAlchemy engine.
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
+
+    Returns:
+        so.sessionmaker[so.Session]: A SQLAlchemy session pool.
+
+    Raises:
+        Exception: If there is an error creating the session pool, an `Exception` is raised.
+
+    """
+    _engine = _get_engine(echo=echo)
+
+    try:
+        session_pool = get_session_pool(_engine)
+    except Exception as exc:
+        msg = f"({type(exc)}) Error creating database session pool. Details: {exc}"
+        log.error(msg)
+
+        raise exc
+
+    return session_pool
+
+
 def save_forecast(
     forecast_schema: t.Union[ForecastJSONCollectorModel, dict, str],
-    engine: sa.Engine | None = None,
     echo: bool = False,
 ) -> ForecastJSONCollectorOut:
     """Save a Forecast (in JSON form) to the database.
@@ -68,10 +137,7 @@ def save_forecast(
 
             raise exc
 
-    if engine is None:
-        engine = db_depends.get_db_engine(echo=echo)
-
-    session_pool = db_depends.get_session_pool(engine=engine)
+    session_pool = _get_session_pool(echo=echo)
 
     with session_pool() as session:
         repo = ForecastJSONCollectorRepository(session=session)
@@ -99,7 +165,7 @@ def save_forecast(
         raise exc
 
 
-def count_weather_forecast(engine: sa.Engine | None = None, echo: bool = False):
+def count_weather_forecast(echo: bool = False):
     """Return a count of the number of rows in the weather forecast table.
 
     Params:
@@ -113,10 +179,7 @@ def count_weather_forecast(engine: sa.Engine | None = None, echo: bool = False):
         Exception: If there is an error counting the number of rows in the weather forecast table, an `Exception` is raised.
 
     """
-    if engine is None:
-        engine = db_depends.get_db_engine(echo=echo)
-
-    session_pool = db_depends.get_session_pool(engine=engine)
+    session_pool = _get_session_pool(echo=echo)
 
     with session_pool() as session:
         repo = ForecastJSONCollectorRepository(session=session)

@@ -3,10 +3,7 @@ from __future__ import annotations
 import json
 import typing as t
 
-from weatherapi_collector.db_client.location import save_location
-
-from shared import db
-from weatherapi_collector.depends import db_depends
+from weatherapi_collector.config import DB_SETTINGS
 from weatherapi_collector.domain import (
     CurrentWeatherJSONCollectorOut,
     CurrentWeatherJSONCollectorIn,
@@ -17,9 +14,12 @@ from weatherapi_collector.domain import (
     ForecastJSONCollectorModel,
     ForecastJSONCollectorOut,
 )
+from weatherapi_collector.db_client.__methods import (
+    get_db_engine,
+    get_db_uri,
+    get_session_pool,
+)
 
-from shared.domain.weatherapi import location as domain_location
-from shared.domain.weatherapi.weather import current as domain_current_weather
 from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
@@ -27,14 +27,79 @@ import sqlalchemy.orm as so
 
 __all__ = [
     "save_current_weather_response",
-    "save_current_weather",
-    "count_current_weather",
+    "count_current_weather_responses",
+    "get_all_current_weather_responses",
 ]
+
+
+def _get_engine(echo: bool = False) -> sa.Engine:
+    """Get a SQLAlchemy engine using the default DB settings.
+
+    Params:
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
+
+    Returns:
+        sa.Engine: A SQLAlchemy engine.
+
+    Raises:
+        Exception: If there is an error creating the engine, an `Exception` is raised.
+
+    """
+    try:
+        db_uri = get_db_uri(
+            drivername=DB_SETTINGS.get("db_drivername"),
+            username=DB_SETTINGS.get("db_username"),
+            password=DB_SETTINGS.get("db_password"),
+            host=DB_SETTINGS.get("db_host"),
+            port=DB_SETTINGS.get("db_port"),
+            database=DB_SETTINGS.get("db_database"),
+        )
+    except Exception as exc:
+        msg = f"({type(exc)}) Error constructing database URI. Details: {exc}"
+        log.error(msg)
+
+        raise exc
+
+    try:
+        engine = get_db_engine(db_uri=db_uri, echo=echo)
+    except Exception as exc:
+        msg = f"({type(exc)}) Error creating database engine. Details: {exc}"
+        log.error(msg)
+
+        raise exc
+
+    return engine
+
+
+def _get_session_pool(echo: bool = False) -> so.sessionmaker[so.Session]:
+    """Get a SQLAlchemy session pool using the provided engine.
+
+    Params:
+        engine (sa.Engine): A SQLAlchemy engine.
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
+
+    Returns:
+        so.sessionmaker[so.Session]: A SQLAlchemy session pool.
+
+    Raises:
+        Exception: If there is an error creating the session pool, an `Exception` is raised.
+
+    """
+    _engine = _get_engine(echo=echo)
+
+    try:
+        session_pool = get_session_pool(_engine)
+    except Exception as exc:
+        msg = f"({type(exc)}) Error creating database session pool. Details: {exc}"
+        log.error(msg)
+
+        raise exc
+
+    return session_pool
 
 
 def save_current_weather_response(
     current_weather_schema: t.Union[CurrentWeatherJSONCollectorIn, dict, str],
-    engine: sa.Engine | None = None,
     echo: bool = False,
 ) -> CurrentWeatherJSONCollectorOut:
     """Save a current weather response (in JSON form) to the database.
@@ -51,6 +116,8 @@ def save_current_weather_response(
     """
     if not current_weather_schema:
         raise ValueError("Missing current weather response to save")
+
+    SessionLocal = _get_session_pool(echo=echo)
 
     if isinstance(current_weather_schema, str):
         try:
@@ -74,12 +141,7 @@ def save_current_weather_response(
 
             raise exc
 
-    if engine is None:
-        engine = db_depends.get_db_engine(echo=echo)
-
-    session_pool = db_depends.get_session_pool(engine=engine)
-
-    with session_pool() as session:
+    with SessionLocal() as session:
         repo = CurrentWeatherJSONCollectorRepository(session=session)
 
         current_weather_model = CurrentWeatherJSONCollectorModel(
@@ -109,180 +171,10 @@ def save_current_weather_response(
         raise exc
 
 
-def save_current_weather(
-    location: t.Union[domain_location.LocationIn, dict, str],
-    current_weather: t.Union[domain_current_weather.CurrentWeatherIn, dict, str],
-    engine: sa.Engine | None = None,
-    echo: bool = False,
-) -> domain_current_weather.CurrentWeatherOut | None:
-    """Save a CurrentWeather to the database.
-
-    Params:
-        location (LocationIn | dict | str): The location to save the current weather for. Can be a LocationIn domain object, dict, or JSON string.
-        current_weather (CurrentWeatherIn | dict | str): The current weather to save. Can be a CurrentWeatherIn domain object, dict, or JSON string.
-
-    Returns:
-        CurrentWeatherOut: The saved current weather.
-
-    Raises:
-        Exception: If current weather cannot be saved, an `Exception` is raised.
-
-    """
-    if not current_weather:
-        raise ValueError("Missing current weather to save")
-
-    if isinstance(current_weather, str):
-        try:
-            current_weather: dict = json.loads(current_weather)
-        except Exception as exc:
-            msg = f"({type(exc)}) Error parsing current weather string as JSON. Details: {exc}"
-            log.error(msg)
-
-            raise exc
-
-    if isinstance(current_weather, dict):
-        try:
-            current_weather: domain_current_weather.CurrentWeatherIn = (
-                domain_current_weather.CurrentWeatherIn.model_validate(current_weather)
-            )
-        except Exception as exc:
-            msg = f"({type(exc)}) Error parsing current weather dict as CurrentWeatherIn domain object. Details: {exc}"
-            log.error(msg)
-
-            raise exc
-
-    if not location:
-        raise ValueError("Missing location to save current weather to")
-
-    if isinstance(location, str):
-        try:
-            location: dict = json.loads(location)
-        except Exception as exc:
-            msg = f"({type(exc)}) Error parsing location string as JSON. Details: {exc}"
-            log.error(msg)
-
-            raise exc
-
-    if isinstance(location, dict):
-        try:
-            location: domain_location.LocationIn = (
-                domain_location.LocationIn.model_validate(location)
-            )
-        except Exception as exc:
-            msg = f"({type(exc)}) Error parsing location dict as LocationIn domain object. Details: {exc}"
-            log.error(msg)
-
-            raise exc
-
-    ## Build special schemas
-    condition_schema: domain_current_weather.CurrentWeatherConditionIn = (
-        current_weather.condition
-    )
-    air_quality_schema: domain_current_weather.CurrentWeatherAirQualityIn = (
-        current_weather.air_quality
-    )
-
-    if engine is None:
-        engine = db_depends.get_db_engine(echo=echo)
-
-    session_pool = db_depends.get_session_pool(engine=engine)
-
-    with session_pool() as session:
-        repo = domain_current_weather.CurrentWeatherRepository(session=session)
-        location_repo = domain_location.LocationRepository(session=session)
-
-        try:
-            db_location: domain_location.LocationModel = save_location(
-                location=location, engine=engine, echo=echo
-            )
-        except Exception as exc:
-            msg = f"({type(exc)}) Error saving location. Details: {exc}"
-            log.error(msg)
-
-            raise exc
-
-        if db_location is None:
-            log.warning("Location database transaction returned None.")
-            return None
-        else:
-            log.info("Converting location database model to API schema")
-            location_schema: domain_location.LocationOut = (
-                domain_location.LocationOut.model_validate(db_location)
-            )
-
-        existing_current_weather_model: (
-            domain_current_weather.CurrentWeatherModel | None
-        ) = repo.get_by_last_updated_epoch(
-            last_updated_epoch=current_weather.last_updated_epoch
-        )
-
-        if existing_current_weather_model:
-            log.info(
-                f"Last updated time has not changed between current weather requests. Returning existing database entity."
-            )
-
-            db_model = existing_current_weather_model
-
-        else:
-            log.info("Did not find recent current weather in database. Adding reading.")
-            weather_dict: dict = current_weather.model_dump(
-                exclude=["air_quality", "condition"]
-            )
-            weather_dict["location_id"] = location_schema.id
-            condition_dict: dict = condition_schema.model_dump()
-            air_quality_dict: dict = air_quality_schema.model_dump()
-
-            try:
-                db_model: domain_current_weather.CurrentWeatherModel = (
-                    repo.create_with_related(
-                        weather_data=weather_dict,
-                        condition_data=condition_dict,
-                        air_quality_data=air_quality_dict,
-                    )
-                )
-            except Exception as exc:
-                msg = f"({type(exc)}) Error adding current weather to database. Details: {exc}"
-                log.error(msg)
-
-                raise exc
-
-        if db_model is None:
-            log.warning("Current weather database transaction returned None.")
-            return None
-        else:
-            log.info("Converting database model to API schema")
-
-            # Eager load related models
-            weather_model = repo.get_with_related(id=db_model.id)
-
-            if weather_model is None:
-                log.error(f"Could not find weather entity by ID [{db_model.id}].")
-                return None
-
-            try:
-                current_weather_schema: domain_current_weather.CurrentWeatherOut = (
-                    domain_current_weather.CurrentWeatherOut.model_validate(
-                        {
-                            **weather_model.__dict__,
-                            "condition": weather_model.condition.__dict__,
-                            "air_quality": weather_model.air_quality.__dict__,
-                        }
-                    )
-                )
-
-                return current_weather_schema
-            except Exception as exc:
-                msg = f"({type(exc)}) Error converting current weather database model to API schema. Details: {exc}"
-                log.error(msg)
-
-                raise exc
-
-
-def count_current_weather(engine: sa.Engine | None = None, echo: bool = False):
+def count_current_weather_responses(echo: bool = False):
     """Return a count of the number of rows in the current weather table.
 
     Params:
-        engine (Engine | None, optional): The database engine to use. If None, the default engine is used. Defaults to None.
         echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
 
     Returns:
@@ -292,12 +184,37 @@ def count_current_weather(engine: sa.Engine | None = None, echo: bool = False):
         Exception: If there is an error counting the number of rows in the current weather table, an `Exception` is raised.
 
     """
-    if engine is None:
-        engine = db_depends.get_db_engine(echo=echo)
+    SessionLocal = _get_session_pool(echo=echo)
 
-    session_pool = db_depends.get_session_pool(engine=engine)
-
-    with session_pool() as session:
-        repo = domain_current_weather.CurrentWeatherRepository(session=session)
+    with SessionLocal() as session:
+        repo = CurrentWeatherJSONCollectorRepository(session=session)
 
         return repo.count()
+
+
+def get_all_current_weather_responses(
+    echo: bool = False,
+) -> list[CurrentWeatherJSONCollectorOut]:
+    """Get all current weather entries from the database.
+
+    Params:
+        engine (Engine | None, optional): The database engine to use. If None, the default engine is used. Defaults to None.
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
+
+    Returns:
+        list[CurrentWeatherOut]: A list of all current weather entries in the database.
+
+    Raises:
+        Exception: If there is an error getting all current weather entries from the database, an `Exception` is raised.
+
+    """
+
+    SessionLocal = _get_session_pool(echo=echo)
+
+    with SessionLocal() as session:
+        repo = CurrentWeatherJSONCollectorRepository(session=session)
+
+        all_models = repo.list() or []
+        log.debug(f"Found {len(all_models)} current weather entries in the database.")
+
+    return all_models
