@@ -2,7 +2,8 @@
 
 THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-NAMESPACE="weatherapi"
+DEFAULT_NAMESPACES=("weatherapi")
+NAMESPACES=()
 TEMPORAL_ADDRESS="localhost:7233"
 
 function print_help() {
@@ -27,7 +28,8 @@ while [[ $# -gt 0 ]]; do
         print_help
         exit 1
       fi
-      NAMESPACE="$2"
+
+      NAMESPACES+=("$2")
       shift 2
       ;;
     -h|--help)
@@ -42,22 +44,25 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-CMD=(
-    docker run --rm \
-    --network=host \
-    temporalio/temporal \
-    operator namespace create \
-    --namespace "$NAMESPACE" \
-    --address "$TEMPORAL_ADDRESS"
-)
+NAMESPACES+=("${DEFAULT_NAMESPACES[@]}")
 
-echo ""
-echo "Create Temporal namespace: $NAMESPACE"
-echo "  Command: ${CMD[*]}"
-echo ""
+for ns in "${NAMESPACES[@]}"; do
+    CMD=(
+        docker run --rm \
+        --network=host \
+        temporalio/temporal \
+        operator namespace create \
+        --namespace "$ns" \
+        --address "$TEMPORAL_ADDRESS"
+    )
 
-"${CMD[@]}"
-if [[ $? -ne 0 ]]; then
-  echo "Failed to $OPERATION temporal namespace."
-  exit 1
-fi
+    echo ""
+    echo "Create Temporal namespace: '$ns' on server: $TEMPORAL_ADDRESS"
+    echo "  Command: ${CMD[*]}"
+    echo ""
+
+    "${CMD[@]}"
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to create temporal namespace."
+    fi
+done
