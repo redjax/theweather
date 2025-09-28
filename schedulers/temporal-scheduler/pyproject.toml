@@ -1,0 +1,39 @@
+[project]
+name = "temporal-scheduler"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "redjax", email = "5534031+redjax@users.noreply.github.com" },
+]
+requires-python = ">=3.12"
+dependencies = [
+    "dynaconf>=3.2.11",
+    "hishel>=0.1.3",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "temporalio>=1.18.0",
+]
+
+[project.scripts]
+temporal-scheduler = "temporal_scheduler:main"
+
+[dependency-groups]
+dev = ["theweather-shared"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/temporal_scheduler"]
+
+# For local development - editable install of shared package
+[tool.uv.sources]
+theweather-shared = { path = "../../shared", editable = true }
+theweather-openapi-collector = { path = "../../collectors/weatherapi-collector/", editable = true }
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
