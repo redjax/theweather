@@ -4,6 +4,7 @@ THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OVERLAYS_DIR="${THIS_DIR}/overlays"
 PG_OVERLAY="${OVERLAYS_DIR}/postgres.yml"
 UI_OVERLAY="${OVERLAYS_DIR}/temporal-ui.yml"
+ADMINTOOLS_OVERLAY="${OVERLAYS_DIR}/temporal-admin-tools.yml"
 
 START_STACK="false"
 STOP_STACK="false"
@@ -77,7 +78,7 @@ fi
 
 cd "$THIS_DIR"
 
-cmd=(docker compose -f compose.yml -f overlays/postgres.yml -f overlays/temporal-ui.yml)
+cmd=(docker compose -f compose.yml -f $PG_OVERLAY -f $UI_OVERLAY -f $ADMINTOOLS_OVERLAY)
 
 if [[ "$START_STACK" == "true" ]]; then
   echo "Starting full Temporal stack"
