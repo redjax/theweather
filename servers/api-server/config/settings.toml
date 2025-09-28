@@ -29,6 +29,7 @@ port = 8000
 root_path = "/"
 reload = true
 log_level = "INFO"
+log_file = ".logs/uvicorn.log"
 workers = 1
 
 [http]

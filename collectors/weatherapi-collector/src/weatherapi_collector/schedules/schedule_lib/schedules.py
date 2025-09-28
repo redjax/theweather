@@ -11,7 +11,11 @@ from weatherapi_collector.depends import get_db_engine
 from weatherapi_collector import db_client
 from weatherapi_collector import client as weatherapi_client
 
-from .jobs import job_weatherapi_current_weather, job_weatherapi_weather_forecast
+from .jobs import (
+    job_weatherapi_current_weather,
+    job_weatherapi_weather_forecast,
+    job_post_weather_readings,
+)
 
 import sqlalchemy as sa
 
@@ -54,6 +58,16 @@ def add_weatherapi_schedules(
         )
 
 
+def add_data_schedules(
+    db_echo: bool = False,
+    minutes_schedule: list[str] = ["00", "15", "30", "45"],
+):
+    for minute in minutes_schedule:
+        schedule.every().hour.at(f":{minute}").do(
+            job_post_weather_readings, echo=db_echo
+        )
+
+
 def start_weatherapi_scheduled_collection(
     location_name: str,
     api_key: str,
@@ -71,6 +85,24 @@ def start_weatherapi_scheduled_collection(
         db_echo=db_echo,
         db_engine=db_engine,
         minutes_schedule=minutes_schedule,
+    )
+
+    add_data_schedules(
+        db_echo=db_echo,
+        minutes_schedule=[
+            "00",
+            "05",
+            "10",
+            "15",
+            "20",
+            "25",
+            "30",
+            "35",
+            "40",
+            "45",
+            "50",
+            "55",
+        ],
     )
 
     log.info(

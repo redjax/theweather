@@ -64,6 +64,11 @@ def parse_args() -> argparse.Namespace:
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Logging level. (default: INFO)",
     )
+    parser.add_argument(
+        "--log-file-path",
+        default=UVICORN_SETTINGS.get("LOG_FILE_PATH", ".logs/api_server.log"),
+        help="Path to log file. (default: .logs/api_server.log)",
+    )
 
     args = parser.parse_args()
 
@@ -183,7 +188,9 @@ def run_uvicorn_server(uvicorn_server: UvicornCustomServer):
 def main():
     args = parse_args()
 
-    setup_loguru_logging(log_level=args.log_level.upper())
+    setup_loguru_logging(
+        log_level=args.log_level.upper(), log_file_path=args.log_file_path
+    )
     # setup.setup_database()
 
     uvicorn_settings = UvicornSettings(

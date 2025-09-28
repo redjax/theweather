@@ -34,14 +34,17 @@ def save_weatherapi_current_weather(
     """
     ## Raw JSON response schema
     raw_json = CurrentWeatherJSONIn(current_weather_json=data)
+    log.debug(f"Raw JSON: {raw_json}")
+
+    _data = data["current_weather_json"]
 
     ## Location schema
-    location = LocationIn.model_validate(data["location"])
+    location = LocationIn.model_validate(_data["location"])
     ## Current weather schema
-    current_weather = CurrentWeatherIn.model_validate(data["current"])
+    current_weather = CurrentWeatherIn.model_validate(_data["current"])
 
     ## Build DB models
-    location_model = LocationModel(**location.model_dump())
+    location_model: LocationModel = LocationModel(**location.model_dump())
     current_weather_model = current_weather.to_orm()
 
     ## Initialize repositories
@@ -50,6 +53,7 @@ def save_weatherapi_current_weather(
     current_weather_repo = CurrentWeatherRepository(session)
 
     ## Save raw JSON
+    log.debug("Saving raw current weather JSON")
     try:
         db_current_weather_json = current_weather_json_repo.create(
             current_weather_json_model := CurrentWeatherJSONModel(

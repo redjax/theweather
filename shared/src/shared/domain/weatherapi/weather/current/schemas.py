@@ -55,6 +55,7 @@ class CurrentWeatherJSONOut(CurrentWeatherJSONIn):
     id: int
 
     created_at: dt.datetime
+    retain: bool
 
 
 class CurrentWeatherConditionIn(BaseModel):

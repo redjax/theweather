@@ -29,6 +29,7 @@ __all__ = [
     "save_current_weather_response",
     "count_current_weather_responses",
     "get_all_current_weather_responses",
+    "set_current_weather_response_retention",
 ]
 
 
@@ -75,7 +76,6 @@ def _get_session_pool(echo: bool = False) -> so.sessionmaker[so.Session]:
     """Get a SQLAlchemy session pool using the provided engine.
 
     Params:
-        engine (sa.Engine): A SQLAlchemy engine.
         echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
 
     Returns:
@@ -106,6 +106,7 @@ def save_current_weather_response(
 
     Params:
         current_weather_schema (CurrentWeatherJSONCollectorIn | dict | str): The current weather response to save. Can be a CurrentWeatherJSONCollectorIn domain object, dict, or JSON string.
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
 
     Returns:
         CurrentWeatherJSONCollectorOut: The saved current weather response.
@@ -198,7 +199,6 @@ def get_all_current_weather_responses(
     """Get all current weather entries from the database.
 
     Params:
-        engine (Engine | None, optional): The database engine to use. If None, the default engine is used. Defaults to None.
         echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
 
     Returns:
@@ -218,3 +218,35 @@ def get_all_current_weather_responses(
         log.debug(f"Found {len(all_models)} current weather entries in the database.")
 
     return all_models
+
+
+def set_current_weather_response_retention(
+    item_id: int,
+    retain: bool,
+    echo: bool = False,
+) -> bool:
+    SessionLocal = _get_session_pool(echo=echo)
+
+    with SessionLocal() as session:
+        repo = CurrentWeatherJSONCollectorRepository(session=session)
+
+        existing_model: CurrentWeatherJSONCollectorModel | None = repo.get(item_id)
+        if not existing_model:
+            raise ValueError(f"Current weather entry with ID {item_id} not found.")
+
+        log.debug(
+            f"Found current weather entry ID {item_id} with retain={existing_model.retain}."
+        )
+
+        if existing_model.retain == retain:
+            log.info(
+                f"Current weather entry with ID {item_id} already has retain={retain}. No update needed."
+            )
+            return True
+
+        # existing_model.retain = retain
+        repo.update(obj=existing_model, data={"retain": retain})
+
+        log.debug(f"Updated current weather entry ID {item_id} to retain={retain}.")
+
+        return True

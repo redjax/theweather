@@ -26,6 +26,7 @@ import sqlalchemy.orm as so
 __all__ = [
     "save_forecast",
     "count_weather_forecast",
+    "get_all_forecast_responses",
 ]
 
 
@@ -185,3 +186,30 @@ def count_weather_forecast(echo: bool = False):
         repo = ForecastJSONCollectorRepository(session=session)
 
         return repo.count()
+
+
+def get_all_forecast_responses(
+    echo: bool = False,
+) -> list[ForecastJSONCollectorOut]:
+    """Get all weather forecast entries from the database.
+
+    Params:
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False.
+
+    Returns:
+        list[ForecastOut]: A list of all weather forecast entries in the database.
+
+    Raises:
+        Exception: If there is an error getting all weather forecast entries from the database, an `Exception` is raised.
+
+    """
+
+    SessionLocal = _get_session_pool(echo=echo)
+
+    with SessionLocal() as session:
+        repo = ForecastJSONCollectorRepository(session=session)
+
+        all_models = repo.list() or []
+        log.debug(f"Found {len(all_models)} weather forecast entries in the database.")
+
+    return all_models

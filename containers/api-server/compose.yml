@@ -14,9 +14,9 @@ services:
     command: ["python3", "-m", "api_server"]
     environment:
       TZ: ${TZ:-Etc/UTC}
-      
+
       DYNACONF_LOGGING__LOG_LEVEL: ${API_SERVER_LOG_LEVEL:-INFO}
-      DYNACONF_LOGGING__LOG_FILE_PATH: ${API_SERVER_LOG_FILE_PATH:-/var/log/weatherapi-collector/app.log}
+      DYNACONF_LOGGING__LOG_FILE_PATH: ${API_SERVER_LOG_FILE_PATH:-/var/log/api-server/app.log}
 
       DYNACONF_DATABASE__DB_TYPE: ${API_SERVER_DB_TYPE:-sqlite}
       DYNACONF_DATABASE__DB_DRIVERNAME: ${API_SERVER_DB_DRIVERNAME:-sqlite+pysqlite}
@@ -24,7 +24,7 @@ services:
       DYNACONF_DATABASE__DB_PASSWORD: ${API_SERVER_DB_PASSWORD}
       DYNACONF_DATABASE__DB_HOST: ${API_SERVER_DB_HOST}
       DYNACONF_DATABASE__DB_PORT: ${API_SERVER_DB_PORT}
-      DYNACONF_DATABASE__DB_DATABASE: ${API_SERVER_DB_DATABASE:-/app/.db/weatherapi-collector.db}
+      DYNACONF_DATABASE__DB_DATABASE: ${API_SERVER_DB_DATABASE:-/app/.db/api-server.db}
       DYNACONF_DATABASE__DB_ECHO: ${API_SERVER_DB_ECHO:-false}
 
       DYNACONF_FASTAPI__DEBUG: ${API_SERVER_FASTAPI_DEBUG:-false}
@@ -47,6 +47,7 @@ services:
       DYNACONF_UVICORN__ROOT_PATH: ${API_SERVER_UVICORN_ROOT_PATH:-/}
       DYNACONF_UVICORN__RELOAD: ${API_SERVER_UVICORN_RELOAD:-false}
       DYNACONF_UVICORN__LOG_LEVEL: ${API_SERVER_UVICORN_LOG_LEVEL:-INFO}
+      DYNACONF_UVICORN__LOG_FILE_PATH: /var/log/api-server/uvicorn.log
       DYNACONF_UVICORN__WORKERS: ${API_SERVER_UVICORN_WORKERS:-1}
     volumes:
       - ../../shared/src:/app/shared/src:ro

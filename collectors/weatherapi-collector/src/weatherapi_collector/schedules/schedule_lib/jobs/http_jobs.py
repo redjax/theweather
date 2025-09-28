@@ -27,7 +27,6 @@ def job_weatherapi_current_weather(
     log.info(
         f"[Scheduled Job] Collect current weather for location '{location_name}' from WeatherAPI"
     )
-    engine = None
     if save_to_db:
         engine = get_db_engine()
 
@@ -50,7 +49,6 @@ def job_weatherapi_current_weather(
                 current_weather_schema=CurrentWeatherJSONIn(
                     current_weather_json=result
                 ),
-                engine=engine,
                 echo=db_echo,
             )
         except Exception as exc:
@@ -89,7 +87,6 @@ def job_weatherapi_weather_forecast(
         try:
             db_client.save_forecast(
                 forecast_schema=ForecastJSONIn(forecast_json=result),
-                engine=engine,
                 echo=db_echo,
             )
         except Exception as exc:

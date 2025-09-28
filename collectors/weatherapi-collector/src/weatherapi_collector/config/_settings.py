@@ -6,7 +6,12 @@ from shared.config import SHARED_CONFIG_DIR
 
 from dynaconf import Dynaconf
 
-__all__ = ["WEATHERAPI_SETTINGS", "DB_SETTINGS", "TEMPORAL_SETTINGS"]
+__all__ = [
+    "WEATHERAPI_SETTINGS",
+    "DB_SETTINGS",
+    "TEMPORAL_SETTINGS",
+    "API_SERVER_SETTINGS",
+]
 
 
 ## Set path to this directory
@@ -40,3 +45,6 @@ DB_SETTINGS = SETTINGS.get("database", {})
 
 ## Extract temporal settings from settings object
 TEMPORAL_SETTINGS = SETTINGS.get("temporal", {})
+
+## Extract central API server settings from settings object
+API_SERVER_SETTINGS = SETTINGS.get("api_server", {})
