@@ -17,8 +17,6 @@ from weatherapi_collector.db_client.__methods import (
 )
 from loguru import logger as log
 
-# from domain.weatherapi import location as domain_location
-# from weather_client.apis.api_weatherapi.db_client.location import save_location
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
@@ -27,6 +25,7 @@ __all__ = [
     "save_forecast",
     "count_weather_forecast",
     "get_all_forecast_responses",
+    "vacuum_forecast_weather_json_responses",
 ]
 
 
@@ -213,3 +212,57 @@ def get_all_forecast_responses(
         log.debug(f"Found {len(all_models)} weather forecast entries in the database.")
 
     return all_models
+
+
+def vacuum_forecast_weather_json_responses(echo: bool = False):
+    """Remove records that are marked retain=False from the database.
+
+    Params:
+        echo (bool, optional): Whether to echo SQL statements to the console. Defaults to False
+    """
+    SessionLocal = _get_session_pool(echo=echo)
+
+    _deleted = []
+    _errored = []
+
+    with SessionLocal() as session:
+        repo = ForecastJSONCollectorRepository(session=session)
+
+        forecast_items: list[ForecastJSONCollectorModel] = repo.list() or []
+
+        if not forecast_items:
+            log.warning("No weather forecast items found in database, skipping vacuum.")
+            return
+
+        log.debug(
+            f"Reviewing [{len(forecast_items)}] weather forecast items for deletion."
+        )
+
+        for item in forecast_items:
+            if not item.retain:
+                log.info(
+                    f"Deleting weather forecast item ID {item.id} (retain={item.retain})."
+                )
+
+                try:
+                    repo.delete(item)
+
+                    _deleted.append(item.id)
+                except Exception as exc:
+                    log.error(
+                        f"({type(exc)}) Error deleting weather forecast item ID {item.id}. Details: {exc}"
+                    )
+
+                    _errored.append(item.id)
+                    continue
+
+            else:
+                log.debug(
+                    f"Retaining weather forecast item ID {item.id} (retain={item.retain})."
+                )
+
+    log.info(
+        f"Vacuum complete. Deleted {_deleted} ({len(_deleted)} items). Errors deleting ({len(_errored)} items)."
+    )
+
+    return _deleted
