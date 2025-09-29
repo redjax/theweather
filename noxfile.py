@@ -42,8 +42,9 @@ VENV_DIR = Path("./.venv").resolve()
 UV_PARENT_DIRS = [
     "collectors/openmeteo-collector/",
     "collectors/weatherapi-collector/",
-    # "api-server/",
+    "api-server/",
     "shared/",
+    "schedulers/temporal-scheduler/",
 ]
 
 
@@ -163,6 +164,9 @@ def run_vulture_check(session: nox.Session):
     ## api-server/
     session.run("vulture", "servers/api-server/", "--min-confidence", "100")
 
+    ## Temporal scheduler
+    session.run("vulture", "schedulers/temporal-scheduler/", "--min-confidence", "100")
+
     ## noxfile.py
     session.run("vulture", "noxfile.py", "--min-confidence", "100")
 
@@ -179,6 +183,7 @@ def export_requirements(session: nox.Session):
         "shared",
         "collectors/*",
         "servers/*",
+        "schedulers/*",
     ]
 
     ## Install uv to run commands
