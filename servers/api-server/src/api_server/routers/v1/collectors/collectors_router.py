@@ -9,6 +9,10 @@ from shared.domain.weatherapi.weather import (
     CurrentWeatherIn,
     CurrentWeatherModel,
     CurrentWeatherRepository,
+    ForecastJSONIn,
+    ForecastJSONModel,
+    ForecastJSONOut,
+    ForecastJSONRepository,
 )
 from shared.domain.weatherapi.location import (
     LocationIn,
@@ -58,6 +62,71 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
                             t.Union[
                                 LocationModel,
                                 CurrentWeatherModel,
+                                CurrentWeatherJSONModel,
+                            ],
+                        ] = save_weatherapi_current_weather(
+                            data=payload.data, session=db
+                        )
+                    except sa_exc.IntegrityError as exc:
+                        log.error(f"Failed to save current weather to database: {exc}")
+                        raise HTTPException(
+                            status_code=409,
+                            detail="Weather data already exists in database.",
+                        )
+                    except sa_exc.InternalError as internal_err:
+                        log.error(
+                            f"Failed to save current weather to database: {internal_err}"
+                        )
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Database error occurred while saving data.",
+                        )
+                    except sa_exc.DBAPIError as db_err:
+                        log.error(
+                            f"Failed to save current weather to database: {db_err}"
+                        )
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Database error occurred while saving data.",
+                        )
+
+                    ## Extract models from db save function return
+                    db_current_weather = db_models["current_weather"]
+                    db_current_weather_json = db_models["current_weather_json"]
+                    db_location = db_models["location"]
+
+                    return JSONResponse(
+                        content={
+                            "success": True,
+                            "message": "Weather data saved to database.",
+                            "location_id": db_location.id,
+                            "current_weather_id": db_current_weather.id,
+                            "current_weather_json_id": db_current_weather_json.id,
+                        },
+                        status_code=status.HTTP_201_CREATED,
+                    )
+
+                ## Forecast weather data
+                case "forecast":
+                    log.info(f"Received forecast weather from collector")
+
+                    ## Attempt to parse the incoming JSON data
+                    try:
+                        data_dict = json.loads(payload.data)
+                        forecast_data = data_dict.get("forecast")
+                        if not forecast_data:
+                            raise ValueError("Missing 'forecast' key in data")
+                    except (json.JSONDecodeError, ValueError) as e:
+                        log.error(f"Invalid JSON data: {e}")
+                        raise HTTPException(status_code=400, detail="Invalid JSON data")
+
+                    ## Attempt to save to database
+                    try:
+                        db_models: dict[
+                            str,
+                            t.Union[
+                                LocationModel,
+                                ForecastJSONModel,
                                 CurrentWeatherJSONModel,
                             ],
                         ] = save_weatherapi_current_weather(

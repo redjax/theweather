@@ -12,6 +12,10 @@ from shared.domain.weatherapi.weather import (
     CurrentWeatherJSONModel,
     CurrentWeatherJSONIn,
     CurrentWeatherJSONRepository,
+    ForecastJSONModel,
+    ForecastJSONIn,
+    ForecastJSONOut,
+    ForecastJSONRepository,
 )
 
 from loguru import logger as log
@@ -113,5 +117,66 @@ def save_weatherapi_current_weather(
     return {
         "current_weather": db_current_weather,
         "current_weather_json": db_current_weather_json,
+        "location": db_location,
+    }
+
+
+def save_weatherapi_weather_forecast(
+    data: dict, session: Session
+) -> dict[str, t.Union[LocationModel, ForecastJSONModel]]:
+    """Save WeatherAPI forecast collector payload data to database.
+
+    Params:
+        data (dict): JSON payload data (WeatherAPI response) from collector.
+        session (Session): SQLAlchemy database session.
+
+    Returns:
+        dict[str, t.Union[LocationModel, ForecastJSONModel]]: Dictionary of models from database.
+    """
+    ## Raw JSON response schema
+    raw_json = ForecastJSONIn(forecast_json=data)
+    log.debug(f"Raw JSON: {raw_json}")
+
+    _data = data["forecast_json"]
+
+    ## Location schema
+    location = LocationIn.model_validate(_data["location"])
+
+    ## Build DB models
+    location_model: LocationModel = LocationModel(**location.model_dump())
+
+    ## Initialize repositories
+    forecast_json_repo = ForecastJSONRepository(session)
+    location_repo = LocationRepository(session)
+
+    ## Save raw JSON
+    log.debug("Saving raw forecast weather JSON")
+    try:
+        db_forecast_json = forecast_json_repo.create(
+            forecast_json_model := ForecastJSONModel(
+                forecast_json=raw_json.forecast_json
+            )
+        )
+        log.debug("Saved raw forecast weather JSON")
+    except Exception as exc:
+        log.error(f"Unhandled exception saving forecast weather JSON: {exc}")
+        raise
+
+    ## Check if Location exists, else save
+    try:
+        db_location = location_repo.get_by_name_country_and_region(
+            location_model.name,
+            location_model.region,
+            location_model.country,
+        )
+        if not db_location:
+            db_location = location_repo.save(location_model)
+        log.debug(f"Using location id: {db_location.id}")
+    except Exception as exc:
+        log.error(f"Error saving location: {exc}")
+        raise
+
+    return {
+        "forecast_json": db_forecast_json,
         "location": db_location,
     }

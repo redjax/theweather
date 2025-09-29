@@ -14,6 +14,7 @@ from weatherapi_collector.schedules.apscheduler_lib.jobs.data_jobs import (
 )
 from weatherapi_collector.schedules.apscheduler_lib.jobs.cleanup_jobs import (
     job_vacuum_current_weather_json_responses,
+    job_vacuum_forecast_weather_json_responses,
 )
 
 __all__ = [
