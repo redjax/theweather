@@ -130,7 +130,7 @@ def save_forecast(
         log.debug(f"Coverting forecast dict to ForecastJSONCollectorIn domain object")
         try:
             forecast_schema: ForecastJSONCollectorIn = ForecastJSONCollectorIn(
-                forecast_schema
+                forecast_json=forecast_schema
             )
         except Exception as exc:
             msg = f"({type(exc)}) Error parsing forecast dict as ForecastJSONIn domain object. Details: {exc}"
