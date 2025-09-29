@@ -13,6 +13,8 @@ retry_backoff = 2
 [weatherapi]
 location_name = "London"
 run_scheduler = true
+## options: "schedule_lib", "apscheduler_lib"
+scheduler = "apscheduler_lib"
 save_to_db = true
 
 [database]
