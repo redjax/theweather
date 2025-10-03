@@ -20,7 +20,10 @@ from shared.domain.weatherapi.location import (
     LocationRepository,
 )
 from api_server.depends import get_db
-from api_server.routers.v1.collectors._db import save_weatherapi_current_weather
+from api_server.routers.v1.collectors._db import (
+    save_weatherapi_current_weather,
+    save_weatherapi_weather_forecast,
+)
 
 from loguru import logger as log
 from fastapi import APIRouter, status, HTTPException, Depends
@@ -65,7 +68,7 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
                                 CurrentWeatherJSONModel,
                             ],
                         ] = save_weatherapi_current_weather(
-                            data=payload.data, session=db
+                            data=payload.data.get("current"), session=db
                         )
                     except sa_exc.IntegrityError as exc:
                         log.error(f"Failed to save current weather to database: {exc}")
@@ -112,10 +115,10 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
 
                     ## Attempt to parse the incoming JSON data
                     try:
-                        data_dict = json.loads(payload.data)
-                        forecast_data = data_dict.get("forecast")
+                        data_dict = payload.data
+                        forecast_data = data_dict.get("forecast_json")
                         if not forecast_data:
-                            raise ValueError("Missing 'forecast' key in data")
+                            raise ValueError("Missing 'forecast_json' key in data")
                     except (json.JSONDecodeError, ValueError) as e:
                         log.error(f"Invalid JSON data: {e}")
                         raise HTTPException(status_code=400, detail="Invalid JSON data")
@@ -127,9 +130,8 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
                             t.Union[
                                 LocationModel,
                                 ForecastJSONModel,
-                                CurrentWeatherJSONModel,
                             ],
-                        ] = save_weatherapi_current_weather(
+                        ] = save_weatherapi_weather_forecast(
                             data=payload.data, session=db
                         )
                     except sa_exc.IntegrityError as exc:
@@ -156,8 +158,7 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
                         )
 
                     ## Extract models from db save function return
-                    db_current_weather = db_models["current_weather"]
-                    db_current_weather_json = db_models["current_weather_json"]
+                    db_weather_forecast_json = db_models["forecast_json"]
                     db_location = db_models["location"]
 
                     return JSONResponse(
@@ -165,8 +166,7 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
                             "success": True,
                             "message": "Weather data saved to database.",
                             "location_id": db_location.id,
-                            "current_weather_id": db_current_weather.id,
-                            "current_weather_json_id": db_current_weather_json.id,
+                            "weather_forecast_json": db_weather_forecast_json.id,
                         },
                         status_code=status.HTTP_201_CREATED,
                     )

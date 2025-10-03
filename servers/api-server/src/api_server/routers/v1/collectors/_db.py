@@ -40,7 +40,7 @@ def save_weatherapi_current_weather(
     raw_json = CurrentWeatherJSONIn(current_weather_json=data)
     log.debug(f"Raw JSON: {raw_json}")
 
-    _data = data["current_weather_json"]
+    _data = data
 
     ## Location schema
     location = LocationIn.model_validate(_data["location"])

@@ -3,12 +3,13 @@ from __future__ import annotations
 import argparse
 import logging
 import typing as t
+from pathlib import Path
 
 from api_server.config import UVICORN_SETTINGS, LOGGING_SETTINGS
 from shared.setup import setup_loguru_logging
 
 from loguru import logger as log
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, ValidationError
 import uvicorn
 
 __all__ = [
@@ -57,12 +58,6 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         default=UVICORN_SETTINGS.get("DEBUG", False),
         help="Enable debug mode. (default: False)",
-    )
-    parser.add_argument(
-        "--log-level",
-        default=UVICORN_SETTINGS.get("LOG_LEVEL", "INFO"),
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Logging level. (default: INFO)",
     )
     parser.add_argument(
         "--log-file-path",
@@ -121,13 +116,25 @@ class UvicornSettings(BaseModel):
     root_path: str = Field(default=UVICORN_SETTINGS.get("ROOT_PATH", "/"))
     reload: bool = Field(default=UVICORN_SETTINGS.get("RELOAD", False))
     log_level: str = Field(default=UVICORN_SETTINGS.get("LOG_LEVEL", "INFO"))
+    log_file: str = Field(default=UVICORN_SETTINGS.get("LOG_FILE", "uvicorn.log"))
+
+    @field_validator("log_level")
+    def validate_log_level(cls, value: str) -> str:
+        try:
+            if value.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+                raise ValueError(
+                    f"Invalid logging levelname: '{value}'. Must be one of: [DEBUG, INFO, WARNING, ERROR, CRITICAL]"
+                )
+
+            return value.lower()
+        except Exception as exc:
+            raise ValidationError
 
 
 def initialize_custom_server(
     uvicorn_settings: UvicornSettings,
-    uvicorn_log_level: str = "WARNING",
 ) -> UvicornCustomServer:
-    match uvicorn_log_level.upper():
+    match uvicorn_settings.log_level.upper():
         case "DEBUG":
             _log_level = logging.DEBUG
         case "INFO":
@@ -140,12 +147,23 @@ def initialize_custom_server(
             _log_level = logging.CRITICAL
         case _:
             log.critical(
-                f"Invalid logging levelname: '{uvicorn_log_level}'. Must be one of: [DEBUG, INFO, WARNING, ERROR, CRITICAL]"
+                f"Invalid logging levelname: '{uvicorn_settings.log_level}'. Must be one of: [DEBUG, INFO, WARNING, ERROR, CRITICAL]"
             )
 
-            raise ValueError(f"Invalid logging levelname: '{uvicorn_log_level}")
+            raise ValueError(
+                f"Invalid logging levelname: '{uvicorn_settings.log_level}"
+            )
 
-    log.debug(f"Override uvicorn's logging level, set to: '{uvicorn_log_level}'.")
+    if uvicorn_settings.log_file and uvicorn_settings.log_level != "":
+        if not Path(uvicorn_settings.log_file).suffix == ".log":
+            uvicorn_settings.log_file += ".log"
+
+        if not Path(uvicorn_settings.log_file).parent.exists():
+            Path(uvicorn_settings.log_file).parent.mkdir(parents=True)
+
+    log.debug(
+        f"Override uvicorn's logging level, set to: '{uvicorn_settings.log_level}'."
+    )
     ## Set Uvicorn's log level
     logging.getLogger(name="uvicorn").setLevel(level=_log_level)
 
@@ -189,7 +207,8 @@ def main():
     args = parse_args()
 
     setup_loguru_logging(
-        log_level=args.log_level.upper(), log_file_path=args.log_file_path
+        log_level=LOGGING_SETTINGS.get("LOG_LEVEL", "INFO").upper(),
+        log_file_path=args.log_file_path,
     )
     # setup.setup_database()
 
@@ -199,7 +218,8 @@ def main():
         port=args.port,
         workers=args.workers,
         reload=args.reload,
-        log_level=args.log_level,
+        log_level=UVICORN_SETTINGS.get("LOG_LEVEL", "INFO").lower(),
+        log_file=UVICORN_SETTINGS.get("LOG_FILE", "uvicorn.log"),
     )
     log.debug(f"Uvicorn settings object: {uvicorn_settings}")
 
