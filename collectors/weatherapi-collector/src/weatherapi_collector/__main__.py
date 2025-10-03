@@ -186,38 +186,7 @@ def start_apscheduler_lib_schedules(
 def main():
 
     _MANUAL_HTTP_MINUTES = []
-    _MANUAL_DATA_MINUTES = [
-        "00",
-        "02",
-        "04",
-        "06",
-        "08",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-        "20",
-        "22",
-        "24",
-        "26",
-        "28",
-        "30",
-        "32",
-        "34",
-        "36",
-        "38",
-        "40",
-        "42",
-        "44",
-        "46",
-        "48",
-        "50",
-        "52",
-        "54",
-        "56",
-        "58",
-    ]
+    _MANUAL_DATA_MINUTES = []
     _MANUAL_CLEANUP_MINUTES = []
 
     RUN_SCHEDULE: bool = WEATHERAPI_SETTINGS.get("RUN_SCHEDULER")
