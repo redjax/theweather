@@ -10,9 +10,12 @@ services:
       ## Set context to repo root
       context: ../..
       dockerfile: containers/weatherapi-collector/Dockerfile
-    working_dir: /app
+      args:
+        UV_BASE: ${UV_IMAGE_VER:-0.6.14}
+        PYTHON_BASE: ${PYTHON_IMG_VER:-3.12-slim}
+    working_dir: /app/collectors/weatherapi-collector
     container_name: weatherapi-collector
-    command: ["python3", "-m", "weatherapi_collector"]
+    command: ["uv", "run", "weatherapi-collector"]
     environment:
       TZ: ${TZ:-Etc/UTC}
 
