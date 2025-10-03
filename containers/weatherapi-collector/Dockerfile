@@ -42,14 +42,6 @@ WORKDIR /app/collectors/weatherapi-collector
 RUN uv sync --all-extras \
     && uv build
 
-## Copy shared package source and install it
-
-# RUN cd shared && uv run pip install .
-
-## Copy and install weatherapi-collector
-
-# RUN cd weatherapi-collector && uv run pip install .
-
 ## Runtime layer
 FROM python:${PYTHON_BASE} AS runtime
 
