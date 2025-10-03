@@ -1,50 +1,59 @@
 ## Base layer
-FROM python:3.12-slim AS base
+ARG UV_BASE=${UV_IMAGE_VER:-0.6.14}
+ARG PYTHON_BASE=${PYTHON_IMG_VER:-3.12-slim}
 
-WORKDIR /app
+FROM ghcr.io/astral-sh/uv:${UV_BASE} AS uv
+FROM python:${PYTHON_BASE} AS base
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         gcc \
-        build-essential \
-        curl \
-    && rm -rf /var/lib/apt/lists/*
+        iputils-ping \
+        build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
+## Stage layer: Copy files into the container for more efficient caching
+FROM base AS stage
+
+WORKDIR /app/servers/api-server
+
+## Copy API server project files
+COPY pyproject.toml uv.lock README.md ./
+
+## Copy API server files
+COPY servers/api-server/ ./
+
+WORKDIR /app/shared
+
+## Copy Shared project files
+COPY shared/ ./
 
 ## Build layer: install dependencies from exported requirements
 FROM base AS build
 
-WORKDIR /app
+COPY --from=stage /app /app
+COPY --from=uv /uv /usr/bin/uv
 
-## ## Generated with: uv export --format requirements-txt --no-dev > requirements.txt
-COPY servers/api-server/requirements.txt ./
+WORKDIR /app/servers/api-server
 
-RUN pip install -r requirements.txt
-
-## Copy shared package source and install it
-COPY shared/ ./shared/
-RUN cd shared && pip install .
-
-## Copy and install API server package
-COPY servers/api-server/ ./api-server/
-RUN cd api-server && pip install .
+## Build project in container
+RUN uv sync --all-extras \
+    && uv build \
+    && uv pip install .
 
 ## Runtime layer
-FROM python:3.12-slim AS runtime
+FROM python:${PYTHON_BASE} AS runtime
 
-WORKDIR /app
+COPY --from=build /app /app
+COPY --from=uv /uv /usr/bin/uv
 
-## Copy dependencies from build
+## Copy installed packages from build layer
 COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
 
-## Copy API server source for runtime usage if necessary
-COPY servers/api-server/ ./api-server/
-
-ENV TZ=Etc/UTC
-
-WORKDIR /app/api-server
+WORKDIR /app/collectors/weatherapi_collector
 
 ## Set the command
-CMD ["python3", "-m", "api_server"]
+CMD ["uv", "run", "api-server"]

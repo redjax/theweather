@@ -22,7 +22,7 @@ dependencies = [
 dev = ["theweather-shared"]
 
 [project.scripts]
-api-server = "api_server:main"
+api-server = "api_server.start_api:main"
 
 [build-system]
 requires = ["hatchling"]
