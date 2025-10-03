@@ -57,6 +57,28 @@ async def _post_current_weather(db_echo: bool = False):
                 res: httpx.Response = http.send_request(req)
                 res.raise_for_status()
 
+                if res.status_code not in [200, 201]:
+                    if res.status_code == 409:
+                        log.warning(
+                            f"Data entity already exists in DB, marking for deletion."
+                        )
+                        try:
+                            success = db_client.set_current_weather_response_retention(
+                                item_id=m.id, retain=False, echo=db_echo
+                            )
+
+                            POST_successes.append(m)
+                        except Exception as exc:
+                            log.error(
+                                f"Error updating current weather response retain flag: {exc}"
+                            )
+                            continue
+                    else:
+                        log.error(
+                            f"Error POSTing current weather readings to API server: ({res.status_code}) {res.text}"
+                        )
+                        continue
+
                 log.info(
                     "Weather POSTed successfully. Setting db object's retain=False"
                 )
@@ -122,6 +144,27 @@ async def _post_forecast_weather(db_echo: bool = False):
             try:
                 res: httpx.Response = http.send_request(req)
                 res.raise_for_status()
+
+                if res.status_code not in [200, 201]:
+                    if res.status_code == 409:
+                        log.warning(f"Data entity already exists. Marking for deletion")
+                        try:
+                            success = db_client.set_current_weather_response_retention(
+                                item_id=m.id, retain=False, echo=db_echo
+                            )
+
+                            POST_successes.append(m)
+                        except Exception as exc:
+                            log.error(
+                                f"Error updating forecast weather response retain flag: {exc}"
+                            )
+                            continue
+
+                    else:
+                        log.error(
+                            f"Non-200 response POSTing weather forecast readings: [{res.status_code}: {res.reason_phrase}] {res.text}"
+                        )
+                        continue
 
                 log.info(
                     "Weather POSTed successfully. Setting db object's retain=False"
