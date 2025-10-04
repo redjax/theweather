@@ -37,8 +37,8 @@
 			"name": "OpenMeteo Collector"
 		},
 		{
-			"path": "../schedulers/temporal-scheduler/",
-			"name": "Temporal Scheduler"
+			"path": "../notebooks/analysis/",
+			"name": "Notebooks - Analysis"
 		}
 	]
 }
