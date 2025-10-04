@@ -1,0 +1,55 @@
+dynaconf_merge = true
+
+[logging]
+log_level = "INFO"
+log_file_path = "logs/weatherapi-collector.log"
+
+[api_server]
+base_url = "http://localhost:8000"
+timeout = 10
+retries = 3
+retry_backoff = 2
+
+[weatherapi]
+location_name = "London"
+run_scheduler = true
+## options: "schedule_lib", "apscheduler_lib"
+scheduler = "apscheduler_lib"
+save_to_db = true
+
+[database]
+## SQLite
+db_type = "sqlite"
+db_drivername = "sqlite+pysqlite"
+db_username = ""
+# Set in .secrets.toml
+# db_password = ""
+db_host = ""
+db_port = ""
+db_database = ".db/weatherapi-collector.dev.sqlite3"
+db_echo = true
+
+## Postgres
+# db_type = "postgres"
+# db_drivername = "postgresql+psycopg2"
+# db_username = "postgres"
+# # Set in .secrets.toml
+# # db_password = ""
+# db_host = "localhost"
+# db_port = "5432"
+# db_database = "theweather-dev"
+# db_echo = true
+
+## MySQL
+# db_type = "mysql"
+# db_drivername = "mysql+pymysql"
+# db_username = "mysql"
+# db_host = "localhost"
+# db_port = 3306
+# db_database = "theweather-dev"
+
+[temporal]
+host = "localhost"
+port = 7233
+namespace = "default"
+log_level = "INFO"
