@@ -38,7 +38,7 @@ def save_weatherapi_current_weather(
     """
     ## Raw JSON response schema
     raw_json = CurrentWeatherJSONIn(current_weather_json=data)
-    log.debug(f"Raw JSON: {raw_json}")
+    # log.debug(f"Raw JSON: {raw_json}")
 
     _data = data
 
