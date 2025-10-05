@@ -29,6 +29,10 @@
 			"name": "API Server"
 		},
 		{
+			"path": "../database/db-operator/",
+			"name": "DB Operator Package"
+		},
+		{
 			"path": "../collectors/weatherapi-collector/",
 			"name": "WeatherAPI Collector"
 		},
