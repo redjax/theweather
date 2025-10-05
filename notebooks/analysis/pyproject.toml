@@ -6,6 +6,7 @@ dependencies = [
     "duckdb>=1.4.0",
     "dynaconf>=3.2.11",
     "fastparquet>=2024.11.0",
+    "ibis-framework[duckdb,postgres,sqlite]>=10.8.0",
     "jupyter>=1.1.1",
     "loguru>=0.7.3",
     "pandas>=2.3.3",
