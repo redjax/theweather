@@ -9,6 +9,7 @@ import sqlalchemy.orm as so
 
 __all__ = [
     "get_db",
+    "return_engine"
 ]
 
 
@@ -28,6 +29,15 @@ def _get_engine(db_uri: sa.URL | None = None, echo: bool = DB_SETTINGS.get("DB_E
         db_uri = _get_db_uri()
 
     return get_engine(url=db_uri, echo=echo)
+
+
+def return_engine(db_uri: sa.URL | None = None, echo: bool = DB_SETTINGS.get("DB_ECHO") or False) -> sa.Engine:
+    log.debug(f"Database engine echo: {echo}")
+    
+    if not db_uri:
+        db_uri = _get_db_uri()
+        
+    return _get_engine(db_uri=db_uri, echo=echo)
 
 
 @contextmanager
