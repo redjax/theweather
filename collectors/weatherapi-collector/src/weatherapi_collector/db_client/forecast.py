@@ -25,6 +25,7 @@ __all__ = [
     "save_forecast",
     "count_weather_forecast",
     "get_all_forecast_responses",
+    "set_weather_forecast_response_retention",
     "vacuum_forecast_weather_json_responses",
 ]
 
@@ -213,6 +214,33 @@ def get_all_forecast_responses(
 
     return all_models
 
+
+def set_weather_forecast_response_retention(item_id: int, retain: bool, echo: bool = False):
+    SessionLocal = _get_session_pool(echo=echo)
+
+    with SessionLocal() as session:
+        repo = ForecastJSONCollectorRepository(session=session)
+
+        existing_model: ForecastJSONCollectorModel | None = repo.get(item_id)
+        if not existing_model:
+            raise ValueError(f"Weather forecast entry with ID {item_id} not found.")
+
+        log.debug(
+            f"Found weather forecast entry ID {item_id} with retain={existing_model.retain}."
+        )
+
+        if existing_model.retain == retain:
+            log.info(
+                f"Weather forecast entry with ID {item_id} already has retain={retain}. No update needed."
+            )
+            return True
+
+        # existing_model.retain = retain
+        repo.update(obj=existing_model, data={"retain": retain})
+
+        log.debug(f"Updated weather forecast entry ID {item_id} to retain={retain}.")
+
+        return True
 
 def vacuum_forecast_weather_json_responses(echo: bool = False):
     """Remove records that are marked retain=False from the database.

@@ -170,7 +170,7 @@ async def _post_forecast_weather(db_echo: bool = False):
                     "Weather POSTed successfully. Setting db object's retain=False"
                 )
                 try:
-                    success = db_client.set_current_weather_response_retention(
+                    success = db_client.set_weather_forecast_response_retention(
                         item_id=m.id, retain=False, echo=db_echo
                     )
 
