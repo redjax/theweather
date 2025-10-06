@@ -37,7 +37,10 @@ def save_weatherapi_current_weather(
         dict[str, t.Union[LocationModel, CurrentWeatherModel, CurrentWeatherJSONModel]]: Dictionary of models from database.
     """
     ## Raw JSON response schema
-    raw_json = CurrentWeatherJSONIn(current_weather_json=data)
+    try:
+        raw_json = CurrentWeatherJSONIn(current_weather_json=data)
+    except Exception as exc:
+        log.error(f"Failed validating JSON data into CurrentWeatherJSONIn ({type(exc)}): {exc}")
     # log.debug(f"Raw JSON: {raw_json}")
 
     _data = data
@@ -135,7 +138,7 @@ def save_weatherapi_weather_forecast(
     """
     ## Raw JSON response schema
     raw_json = ForecastJSONIn(forecast_json=data)
-    log.debug(f"Raw JSON: {raw_json}")
+    # log.debug(f"Raw JSON: {raw_json}")
 
     _data = data["forecast_json"]
 

@@ -44,8 +44,8 @@ def collectors_status():
 
 @router.post("/weather", status_code=status.HTTP_201_CREATED)
 def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(get_db)):
-    log.debug(
-        f"Received: [source: {payload.source}] | [label: {payload.label}] | {payload.data}"
+    log.info(
+        f"Received: [source: {payload.source}] | [label: {payload.label}]"
     )
 
     match payload.source:
