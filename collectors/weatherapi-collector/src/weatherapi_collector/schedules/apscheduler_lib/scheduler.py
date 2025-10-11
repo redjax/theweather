@@ -1,21 +1,23 @@
+from __future__ import annotations
+
+import asyncio
 import typing as t
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-import asyncio
-from loguru import logger as log
-
-from weatherapi_collector.schedules.apscheduler_lib.jobs.http_jobs import (
-    job_weatherapi_current_weather,
-    job_weatherapi_weather_forecast,
-)
-from weatherapi_collector.schedules.apscheduler_lib.jobs.data_jobs import (
-    job_post_weather_readings,
-)
 from weatherapi_collector.schedules.apscheduler_lib.jobs.cleanup_jobs import (
     job_vacuum_current_weather_json_responses,
     job_vacuum_forecast_weather_json_responses,
 )
+from weatherapi_collector.schedules.apscheduler_lib.jobs.data_jobs import (
+    job_post_weather_readings,
+)
+from weatherapi_collector.schedules.apscheduler_lib.jobs.http_jobs import (
+    job_weatherapi_current_weather,
+    job_weatherapi_weather_forecast,
+)
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from loguru import logger as log
 
 __all__ = [
     "setup_schedule",

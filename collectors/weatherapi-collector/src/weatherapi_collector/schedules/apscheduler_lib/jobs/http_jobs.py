@@ -1,10 +1,15 @@
-from loguru import logger as log
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from weatherapi_collector import client as weatherapi_client, db_client
-from weatherapi_collector.depends import get_db_engine
+from __future__ import annotations
 
 import asyncio
 
+from weatherapi_collector import (
+    client as weatherapi_client,
+    db_client,
+)
+from weatherapi_collector.depends import get_db_engine
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from loguru import logger as log
 
 __all__ = ["job_weatherapi_current_weather", "job_weatherapi_weather_forecast"]
 

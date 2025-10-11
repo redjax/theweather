@@ -1,25 +1,27 @@
-import typing as t
+from __future__ import annotations
+
 from copy import deepcopy
+import typing as t
 
-from shared.setup import setup_loguru_logging
-from shared.domain.weatherapi.weather import CurrentWeatherJSONIn, ForecastJSONIn
-
+from weatherapi_collector import (
+    client as weatherapi_client,
+    db_client,
+)
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
-from weatherapi_collector import client as weatherapi_client
+from weatherapi_collector.db_init import initialize_database
+from weatherapi_collector.depends import get_db_engine
+from weatherapi_collector.schedules.apscheduler_lib import (
+    default_cron_schedule,
+    start_scheduler,
+)
 from weatherapi_collector.schedules.schedule_lib import (
     start_weatherapi_scheduled_collection,
 )
-from weatherapi_collector.schedules.apscheduler_lib import (
-    start_scheduler,
-    default_cron_schedule,
-)
-from weatherapi_collector import db_client
-from weatherapi_collector.depends import get_db_engine
-from weatherapi_collector.db_init import initialize_database
 
 from loguru import logger as log
+from shared.domain.weatherapi.weather import CurrentWeatherJSONIn, ForecastJSONIn
+from shared.setup import setup_loguru_logging
 import sqlalchemy as sa
-
 
 def collect_current_weather(location_name: str | None = None) -> dict:
     return weatherapi_client.get_current_weather(location=location_name)

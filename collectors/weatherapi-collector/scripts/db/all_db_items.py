@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from weatherapi_collector import db_client
 from weatherapi_collector.domain import (
     CurrentWeatherJSONCollectorModel,

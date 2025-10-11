@@ -1,17 +1,18 @@
+from __future__ import annotations
+
 import asyncio
 import uuid
 
-from shared.setup import setup_loguru_logging
-from weatherapi_collector.schedules.temporal.workflows import WeatherWorkflow
 from weatherapi_collector.config._settings import (
     SETTINGS,
     TEMPORAL_SETTINGS,
     WEATHERAPI_SETTINGS,
 )
+from weatherapi_collector.schedules.temporal.workflows import WeatherWorkflow
 
-from temporalio.client import Client
 from loguru import logger as log
-
+from shared.setup import setup_loguru_logging
+from temporalio.client import Client
 
 __all__ = ["run_weather_workflow"]
 

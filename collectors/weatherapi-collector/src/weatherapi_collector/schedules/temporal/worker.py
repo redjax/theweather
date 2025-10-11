@@ -1,7 +1,17 @@
+from __future__ import annotations
+
 import asyncio
 import concurrent.futures
 import logging
 
+from weatherapi_collector.config._settings import TEMPORAL_SETTINGS
+from weatherapi_collector.schedules.temporal.activities import (
+    poll_current_weather,
+    poll_weather_forecast,
+)
+from weatherapi_collector.schedules.temporal.workflows import WeatherWorkflow
+
+from loguru import logger as log
 from temporalio.client import Client
 from temporalio.worker import Worker
 
@@ -10,16 +20,6 @@ from temporalio.worker.workflow_sandbox import (
     SandboxedWorkflowRunner,
     SandboxRestrictions,
 )
-
-from weatherapi_collector.schedules.temporal.workflows import WeatherWorkflow
-from weatherapi_collector.schedules.temporal.activities import (
-    poll_current_weather,
-    poll_weather_forecast,
-)
-from weatherapi_collector.config._settings import TEMPORAL_SETTINGS
-
-from loguru import logger as log
-
 
 async def main():
     logging.basicConfig(level=TEMPORAL_SETTINGS.get("LOG_LEVEL", "INFO"))

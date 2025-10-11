@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import asyncio
 
-from shared.setup import setup_loguru_logging
 from weatherapi_collector.config import TEMPORAL_SETTINGS
 from weatherapi_collector.schedules.temporal import worker
 
 from loguru import logger as log
-
+from shared.setup import setup_loguru_logging
 
 __all__ = ["start_worker"]
 

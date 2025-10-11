@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from weatherapi_collector.client import get_current_weather, get_weather_forecast
 
-from temporalio import activity
 from loguru import logger as log
-
+from temporalio import activity
 
 __all__ = [
     "poll_current_weather",

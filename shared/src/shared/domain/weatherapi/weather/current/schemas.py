@@ -5,9 +5,9 @@ from decimal import Decimal
 import typing as t
 
 from .models import (
-    CurrentWeatherModel,
-    CurrentWeatherConditionModel,
     CurrentWeatherAirQualityModel,
+    CurrentWeatherConditionModel,
+    CurrentWeatherModel,
 )
 
 from loguru import logger as log

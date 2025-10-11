@@ -1,18 +1,21 @@
+from __future__ import annotations
+
 import typing as t
 
-from shared.domain.weatherapi.weather import (
-    ForecastJSONModel,
-    ForecastJSONIn,
-    CurrentWeatherJSONModel,
-    CurrentWeatherJSONIn,
+from weatherapi_collector import (
+    client as weatherapi_client,
+    db_client,
 )
 from weatherapi_collector.depends import get_db_engine
-from weatherapi_collector import db_client
-from weatherapi_collector import client as weatherapi_client
 
 from loguru import logger as log
+from shared.domain.weatherapi.weather import (
+    CurrentWeatherJSONIn,
+    CurrentWeatherJSONModel,
+    ForecastJSONIn,
+    ForecastJSONModel,
+)
 import sqlalchemy as sa
-
 
 __all__ = ["job_weatherapi_current_weather", "job_weatherapi_weather_forecast"]
 

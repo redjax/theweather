@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .models import *
-from .schemas import *
 from .repository import *
+from .schemas import *

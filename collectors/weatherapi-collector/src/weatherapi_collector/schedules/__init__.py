@@ -1,3 +1,3 @@
-from . import temporal
-from . import schedule_lib
-from . import apscheduler_lib
+from __future__ import annotations
+
+from . import apscheduler_lib, schedule_lib, temporal
