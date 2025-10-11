@@ -267,7 +267,7 @@ def vacuum_current_weather_json_responses(echo: bool = False):
     with SessionLocal() as session:
         repo = CurrentWeatherJSONCollectorRepository(session=session)
 
-        all_current_weather_items = repo.list() or []
+        all_current_weather_items: list[CurrentWeatherJSONCollectorModel] = repo.list() or []
 
         if not all_current_weather_items:
             log.warning("No current weather items found in database, skipping vacuum.")
