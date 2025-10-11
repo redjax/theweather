@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import datetime as dt
 
 from weatherapi_collector.db_client.base import Base
-from sqlalchemy import Column, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
 
 import sqlalchemy as sa
+from sqlalchemy import Boolean, Column
+from sqlalchemy.orm import Mapped, mapped_column
 
 __all__ = [
     "CurrentWeatherJSONCollectorModel",

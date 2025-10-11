@@ -1,8 +1,9 @@
-from shared.setup import setup_loguru_logging
-from weatherapi_collector.db_client import vacuum_current_weather
-from weatherapi_collector.config import DB_SETTINGS
+from __future__ import annotations
 
 from loguru import logger as log
+from shared.setup import setup_loguru_logging
+from weatherapi_collector.config import DB_SETTINGS
+from weatherapi_collector.db_client import vacuum_current_weather
 
 if __name__ == "__main__":
     setup_loguru_logging()

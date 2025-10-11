@@ -1,18 +1,20 @@
+from __future__ import annotations
+
 import sys
 
 sys.path.append("./src")
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
-
+from sqlalchemy import engine_from_config, pool
 from weatherapi_collector.db_client import Base
-
-from weatherapi_collector.domain.models import ForecastJSONCollectorModel, LocationJSONCollectorModel, CurrentWeatherJSONCollectorModel
 from weatherapi_collector.depends.db_depends import get_db_uri
+from weatherapi_collector.domain.models import (
+    CurrentWeatherJSONCollectorModel,
+    ForecastJSONCollectorModel,
+    LocationJSONCollectorModel,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

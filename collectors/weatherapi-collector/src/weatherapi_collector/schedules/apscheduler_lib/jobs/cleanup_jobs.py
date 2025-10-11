@@ -1,6 +1,10 @@
-from loguru import logger as log
-from weatherapi_collector import db_client
+from __future__ import annotations
+
 import asyncio
+
+from weatherapi_collector import db_client
+
+from loguru import logger as log
 
 __all__ = ["job_vacuum_current_weather_json_responses"]
 

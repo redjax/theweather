@@ -1,16 +1,16 @@
-from shared.db.base import BaseRepository
-from shared.domain.weatherapi.weather import (
-    CurrentWeatherJSONModel as SharedCurrentWeatherJSONModel,
-    ForecastJSONModel as SharedForecastJSONModel,
-)
+from __future__ import annotations
 
 from .models import (
     CurrentWeatherJSONCollectorModel,
     ForecastJSONCollectorModel,
 )
 
+from shared.db.base import BaseRepository
+from shared.domain.weatherapi.weather import (
+    CurrentWeatherJSONModel as SharedCurrentWeatherJSONModel,
+    ForecastJSONModel as SharedForecastJSONModel,
+)
 import sqlalchemy.orm as so
-
 
 __all__ = [
     "CurrentWeatherJSONCollectorRepository",

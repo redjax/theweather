@@ -3,15 +3,14 @@ from __future__ import annotations
 import time
 
 from shared import http_lib
-
-from weatherapi_collector.db_client.current_weather import (
-    save_current_weather_response,
-)
 from weatherapi_collector.config import WEATHERAPI_SETTINGS
 from weatherapi_collector.convert.methods import (
     current_weather_dict_to_schema,
     current_weather_response_dict_to_schema,
     location_dict_to_schema,
+)
+from weatherapi_collector.db_client.current_weather import (
+    save_current_weather_response,
 )
 
 from . import requests

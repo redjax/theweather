@@ -6,8 +6,8 @@ import typing as t
 from loguru import logger as log
 from shared.domain.weatherapi.location import (
     LocationIn,
-    LocationOut,
     LocationModel,
+    LocationOut,
 )
 from shared.domain.weatherapi.weather.current import (
     CurrentWeatherIn,

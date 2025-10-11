@@ -12,5 +12,6 @@
 # [tool.uv.sources]
 # theweather-shared = { path = "../../shared" }
 # ///
+from __future__ import annotations
 
 from shared.setup import setup_loguru_logging

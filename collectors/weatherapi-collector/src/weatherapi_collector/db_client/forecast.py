@@ -4,19 +4,19 @@ import json
 import typing as t
 
 from weatherapi_collector.config import DB_SETTINGS
-from weatherapi_collector.domain import (
-    ForecastJSONCollectorModel,
-    ForecastJSONCollectorOut,
-    ForecastJSONCollectorRepository,
-    ForecastJSONCollectorIn,
-)
 from weatherapi_collector.db_client.__methods import (
     get_db_engine,
     get_db_uri,
     get_session_pool,
 )
-from loguru import logger as log
+from weatherapi_collector.domain import (
+    ForecastJSONCollectorIn,
+    ForecastJSONCollectorModel,
+    ForecastJSONCollectorOut,
+    ForecastJSONCollectorRepository,
+)
 
+from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
@@ -203,7 +203,6 @@ def get_all_forecast_responses(
         Exception: If there is an error getting all weather forecast entries from the database, an `Exception` is raised.
 
     """
-
     SessionLocal = _get_session_pool(echo=echo)
 
     with SessionLocal() as session:

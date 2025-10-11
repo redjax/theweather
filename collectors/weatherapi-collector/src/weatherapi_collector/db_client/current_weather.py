@@ -4,20 +4,20 @@ import json
 import typing as t
 
 from weatherapi_collector.config import DB_SETTINGS
-from weatherapi_collector.domain import (
-    CurrentWeatherJSONCollectorOut,
-    CurrentWeatherJSONCollectorIn,
-    CurrentWeatherJSONCollectorModel,
-    CurrentWeatherJSONCollectorRepository,
-    ForecastJSONCollectorRepository,
-    ForecastJSONCollectorIn,
-    ForecastJSONCollectorModel,
-    ForecastJSONCollectorOut,
-)
 from weatherapi_collector.db_client.__methods import (
     get_db_engine,
     get_db_uri,
     get_session_pool,
+)
+from weatherapi_collector.domain import (
+    CurrentWeatherJSONCollectorIn,
+    CurrentWeatherJSONCollectorModel,
+    CurrentWeatherJSONCollectorOut,
+    CurrentWeatherJSONCollectorRepository,
+    ForecastJSONCollectorIn,
+    ForecastJSONCollectorModel,
+    ForecastJSONCollectorOut,
+    ForecastJSONCollectorRepository,
 )
 
 from loguru import logger as log
@@ -209,7 +209,6 @@ def get_all_current_weather_responses(
         Exception: If there is an error getting all current weather entries from the database, an `Exception` is raised.
 
     """
-
     SessionLocal = _get_session_pool(echo=echo)
 
     with SessionLocal() as session:

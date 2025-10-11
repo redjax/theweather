@@ -1,5 +1,8 @@
+from __future__ import annotations
+
+import asyncio
+
 from weatherapi_collector import db_client
-from shared.depends import get_httpx_controller
 from weatherapi_collector.config import API_SERVER_SETTINGS
 from weatherapi_collector.domain import (
     CurrentWeatherJSONCollectorModel,
@@ -8,9 +11,9 @@ from weatherapi_collector.domain import (
     ForecastJSONCollectorOut,
 )
 
-from loguru import logger as log
-import asyncio
 import httpx
+from loguru import logger as log
+from shared.depends import get_httpx_controller
 
 __all__ = ["job_post_weather_readings"]
 

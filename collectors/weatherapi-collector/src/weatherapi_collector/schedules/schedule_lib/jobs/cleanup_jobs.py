@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from weatherapi_collector import db_client
@@ -9,7 +11,6 @@ from weatherapi_collector.domain import (
 )
 
 from loguru import logger as log
-
 
 __all__ = [
     "job_vacuum_current_weather_json_responses",

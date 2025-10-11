@@ -6,8 +6,8 @@ import typing as t
 log = logging.getLogger(__name__)
 
 from shared import db
-
 from weatherapi_collector.config import DB_SETTINGS
+
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
