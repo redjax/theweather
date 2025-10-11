@@ -9,13 +9,15 @@ Examples:
 
 from __future__ import annotations
 
+from shared.db.types import GUID
+
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 import sqlalchemy.orm as so
 from typing_extensions import Annotated
 
-__all__ = ["INT_PK", "STR_10", "STR_255", "PG_MUT_JSONB"]
+__all__ = ["INT_PK", "STR_10", "STR_255", "PG_MUT_JSONB", "UUID_PK"]
 
 ## Annotated auto-incrementing integer primary key column
 INT_PK = Annotated[
@@ -28,3 +30,10 @@ STR_10 = Annotated[str, so.mapped_column(sa.VARCHAR(10))]
 STR_255 = Annotated[str, so.mapped_column(sa.VARCHAR(255))]
 ## Mutable JSONB column (Postgres only)
 PG_MUT_JSONB = Annotated[dict, so.mapped_column(MutableDict.as_mutable(JSONB))]
+## Dynamic UUID id column. Compatible across databases (postgres, sqlite, mysql)
+UUID_PK = Annotated[
+    uuid.UUID,
+    so.mapped_column(
+        GUID(), primary_key=True, unique=True, default=uuid.uuid4, index=True
+    ),
+]
