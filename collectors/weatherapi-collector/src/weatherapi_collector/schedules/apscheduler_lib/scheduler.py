@@ -81,7 +81,14 @@ def setup_schedule(
         job_vacuum_current_weather_json_responses,
         args=[db_echo],
         trigger=CronTrigger(**{**default_cron_schedule, **_cleanup_jobs_schedule}),
-        id="vacuum_cleanup",
+        id="weatherapi_current_weather_vacuum",
+    )
+    
+    scheduler.add_job(
+        job_vacuum_forecast_weather_json_responses,
+        args=[db_echo],
+        trigger=CronTrigger(**{**default_cron_schedule, **_cleanup_jobs_schedule}),
+        id="weatherapi_forecast_vacuum",
     )
 
     return scheduler
