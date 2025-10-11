@@ -27,7 +27,7 @@ nox.sessions = ["ruff-lint", "export"]
 log: logging.Logger = logging.getLogger("nox")
 
 ## Define versions to test
-PY_VERSIONS: list[str] = ["3.12", "3.11"]
+PY_VERSIONS: list[str] = ["3.13", "3.12"]
 ## Get tuple of Python ver ('maj', 'min', 'mic')
 PY_VER_TUPLE: tuple[str, str, str] = platform.python_version_tuple()
 ## Dynamically set Python version
