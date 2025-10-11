@@ -141,6 +141,16 @@ def run_linter(session: nox.Session):
         external=True,
     )
 
+@nox.session(python=[DEFAULT_PYTHON], name="count-loc", tags=["quality"])
+def count_lines(session):
+    ## Install pygount in the session virtual environment
+    session.install("pygount")
+
+    ## Run pygount on the current directory recursively
+    #  --format=summary outputs a concise summary
+    #  You can customize arguments as needed
+    session.run("pygount", ".", "--format=summary")
+
 
 @nox.session(python=[DEFAULT_PYTHON], name="vulture-check", tags=["quality"])
 def run_vulture_check(session: nox.Session):
