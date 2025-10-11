@@ -19,7 +19,10 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["theweather-shared"]
+dev = [
+    "alembic>=1.16.5",
+    "theweather-shared",
+]
 
 [project.scripts]
 api-server = "api_server.start_api:main"
