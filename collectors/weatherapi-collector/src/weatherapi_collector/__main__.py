@@ -7,7 +7,7 @@ from weatherapi_collector import (
     client as weatherapi_client,
     db_client,
 )
-from weatherapi_collector.config import WEATHERAPI_SETTINGS
+from weatherapi_collector.config import WEATHERAPI_SETTINGS, APSCHEDULER_SETTINGS
 from weatherapi_collector.db_init import initialize_database
 from weatherapi_collector.depends import get_db_engine
 from weatherapi_collector.schedules.apscheduler_lib import (
@@ -262,29 +262,15 @@ def main():
     # APScheduler library #
     #######################
 
-    ## Set weatherapi job schedule for APScheduler from schedule lib settings
-    APSCHEDULER_LIB_WEATHERAPI_JOBS_SCHEDULE_CRON = deepcopy(default_cron_schedule)
-    APSCHEDULER_LIB_WEATHERAPI_JOBS_SCHEDULE_CRON["minute"] = ",".join(
-        SCHEDULE_LIB_WEATHERAPI_JOBS_SCHEDULE_MINUTES_LIST
-    )
-
-    ## Set data jobs schedule for APScheduler from schedule lib settings
-    APSCHEDULER_LIB_DATA_JOBS_SCHEDULE_CRON = deepcopy(default_cron_schedule)
-    APSCHEDULER_LIB_DATA_JOBS_SCHEDULE_CRON["minute"] = ",".join(
-        SCHEDULE_LIB_DATA_JOBS_SCHEDULE_MINUTES_LIST
-    )
-
-    ## Set cleanup jobs schedule for APScheduler from schedule lib settings
-    APSCHEDULER_LIB_CLEANUP_JOBS_SCHEDULE_CRON = deepcopy(default_cron_schedule)
-    APSCHEDULER_LIB_CLEANUP_JOBS_SCHEDULE_CRON["minute"] = ",".join(
-        SCHEDULE_LIB_CLEANUP_JOBS_SCHEDULE_MINUTES_LIST
-    )
-
-    ## All APScheduler jobs schedules
+    ## Set schedules for jobs
     APSCHEDULER_LIB_JOBS_SCHEDULES = {
-        "weatherapi_jobs": APSCHEDULER_LIB_WEATHERAPI_JOBS_SCHEDULE_CRON,
-        "data_jobs": APSCHEDULER_LIB_DATA_JOBS_SCHEDULE_CRON,
-        "cleanup_jobs": APSCHEDULER_LIB_CLEANUP_JOBS_SCHEDULE_CRON,
+        "weatherapi_jobs": APSCHEDULER_SETTINGS.get(
+            "REQUEST_JOBS_SCHEDULE", "*/15 * * * *"
+        ),
+        "data_jobs": APSCHEDULER_SETTINGS.get("DATA_JOBS_SCHEDULE", "*/20 * * * *"),
+        "cleanup_jobs": APSCHEDULER_SETTINGS.get(
+            "CLEANUP_JOBS_SCHEDULE", "*/5 * * * *"
+        ),
     }
 
     ############################

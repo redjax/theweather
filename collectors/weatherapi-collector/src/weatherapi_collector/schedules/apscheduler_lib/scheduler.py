@@ -48,48 +48,57 @@ def setup_schedule(
     forecast_days: int = 1,
     save_to_db: bool = False,
     db_echo: bool = False,
-    cron_schedules: t.Optional[dict[str, dict[str, t.Any]]] = None,
+    cron_schedules: t.Optional[dict[str, t.Any]] = None,
 ):
-    _weatherapi_schedule = cron_schedules.get("weatherapi_jobs", {})
-    _data_jobs_schedule = cron_schedules.get("data_jobs", {})
-    _cleanup_jobs_schedule = cron_schedules.get("cleanup_jobs", {})
-
     scheduler = AsyncIOScheduler()
 
-    ## Weather jobs (quarter-hourly)
+    def make_trigger(value):
+        # Accept both dicts and full cron string expressions
+        if isinstance(value, str):
+            return CronTrigger.from_crontab(value)
+        elif isinstance(value, dict):
+            return CronTrigger(**{**default_cron_schedule, **value})
+        else:
+            raise TypeError(f"Unsupported cron schedule type: {type(value)}")
+
+    _weatherapi_schedule = cron_schedules.get("weatherapi_jobs")
+    _data_jobs_schedule = cron_schedules.get("data_jobs")
+    _cleanup_jobs_schedule = cron_schedules.get("cleanup_jobs")
+
+    # Create triggers dynamically
+    weather_trigger = make_trigger(_weatherapi_schedule)
+    data_trigger = make_trigger(_data_jobs_schedule)
+    cleanup_trigger = make_trigger(_cleanup_jobs_schedule)
+
+    # Add jobs
     scheduler.add_job(
         job_weatherapi_current_weather,
-        trigger=CronTrigger(**{**default_cron_schedule, **_weatherapi_schedule}),
+        trigger=weather_trigger,
         args=[location_name, api_key, save_to_db, db_echo],
         id="weatherapi_current_weather",
     )
     scheduler.add_job(
         job_weatherapi_weather_forecast,
-        trigger=CronTrigger(**{**default_cron_schedule, **_weatherapi_schedule}),
+        trigger=weather_trigger,
         args=[location_name, api_key, forecast_days, save_to_db, db_echo],
         id="weatherapi_forecast",
     )
-
-    ## Data posting jobs (every 20 min)
     scheduler.add_job(
         job_post_weather_readings,
-        trigger=CronTrigger(**{**default_cron_schedule, **_data_jobs_schedule}),
+        trigger=data_trigger,
         args=[db_echo],
         id="post_weather_readings",
     )
-
-    ## Cleanup jobs (every 10 min)
     scheduler.add_job(
         job_vacuum_current_weather_json_responses,
+        trigger=cleanup_trigger,
         args=[db_echo],
-        trigger=CronTrigger(**{**default_cron_schedule, **_cleanup_jobs_schedule}),
         id="weatherapi_current_weather_vacuum",
     )
-    
     scheduler.add_job(
         job_vacuum_forecast_weather_json_responses,
+        trigger=cleanup_trigger,
         args=[db_echo],
-        trigger=CronTrigger(**{**default_cron_schedule, **_cleanup_jobs_schedule}),
         id="weatherapi_forecast_vacuum",
     )
 
