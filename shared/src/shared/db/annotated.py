@@ -8,7 +8,7 @@ Examples:
 """
 
 from __future__ import annotations
-
+import uuid
 from shared.db.types import GUID
 
 import sqlalchemy as sa

@@ -404,6 +404,9 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.43" },
 ]
 
+[package.metadata.requires-dev]
+dev = [{ name = "alembic", specifier = ">=1.16.5" }]
+
 [[package]]
 name = "types-protobuf"
 version = "6.32.1.20250918"

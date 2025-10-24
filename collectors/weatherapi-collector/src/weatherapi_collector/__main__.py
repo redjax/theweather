@@ -23,6 +23,7 @@ from shared.domain.weatherapi.weather import CurrentWeatherJSONIn, ForecastJSONI
 from shared.setup import setup_loguru_logging
 import sqlalchemy as sa
 
+
 def collect_current_weather(location_name: str | None = None) -> dict:
     return weatherapi_client.get_current_weather(location=location_name)
 
