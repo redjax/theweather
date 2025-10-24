@@ -17,6 +17,12 @@ run_scheduler = true
 scheduler = "apscheduler_lib"
 save_to_db = true
 
+[weatherapi.apscheduler]
+
+request_jobs_schedule = "*/15 * * * *"
+data_jobs_schedule = "*/20 * * * *"
+cleanup_jobs_schedule = "*/5 * * * *"
+
 [database]
 ## SQLite
 db_type = "sqlite"

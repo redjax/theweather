@@ -11,6 +11,7 @@ __all__ = [
     "DB_SETTINGS",
     "TEMPORAL_SETTINGS",
     "API_SERVER_SETTINGS",
+    "APSCHEDULER_SETTINGS",
 ]
 
 
@@ -48,3 +49,6 @@ TEMPORAL_SETTINGS = SETTINGS.get("temporal", {})
 
 ## Extract central API server settings from settings object
 API_SERVER_SETTINGS = SETTINGS.get("api_server", {})
+
+## Load APScheduler cron strings
+APSCHEDULER_SETTINGS = SETTINGS.get("weatherapi.apscheduler")
