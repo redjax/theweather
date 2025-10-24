@@ -40,10 +40,13 @@ def save_weatherapi_current_weather(
     try:
         raw_json = CurrentWeatherJSONIn(current_weather_json=data)
     except Exception as exc:
-        log.error(f"Failed validating JSON data into CurrentWeatherJSONIn ({type(exc)}): {exc}")
+        log.error(
+            f"Failed validating JSON data into CurrentWeatherJSONIn ({type(exc)}): {exc}"
+        )
     # log.debug(f"Raw JSON: {raw_json}")
 
     _data = data
+    log.debug(f"save_weatherapi_current_weather data dict: {_data}")
 
     ## Location schema
     location = LocationIn.model_validate(_data["location"])

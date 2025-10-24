@@ -44,19 +44,15 @@ def collectors_status():
 
 @router.post("/weather", status_code=status.HTTP_201_CREATED)
 def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(get_db)):
-    log.info(
-        f"Received: [source: {payload.source}] | [label: {payload.label}]"
-    )
+    log.info(f"Received: [source: {payload.source}] | [label: {payload.label}]")
 
     match payload.source:
-
         ## WeatherAPI collector data
         case "weatherapi":
             match payload.label:
-
                 ## Current weather data
                 case "current":
-                    log.info(f"Received current weather from collector")
+                    log.info("Received current weather from collector")
 
                     ## Attempt to save to database
                     try:
@@ -68,7 +64,7 @@ def receive_weather(payload: WeatherCollectorPayloadIn, db: Session = Depends(ge
                                 CurrentWeatherJSONModel,
                             ],
                         ] = save_weatherapi_current_weather(
-                            data=payload.data.get("current"), session=db
+                            data=payload.data.get("current_weather_json"), session=db
                         )
                     except sa_exc.IntegrityError as exc:
                         log.error(f"Failed to save current weather to database: {exc}")
