@@ -246,6 +246,7 @@ def set_current_weather_response_retention(
 
         # existing_model.retain = retain
         repo.update(obj=existing_model, data={"retain": retain})
+        repo.session.refresh(existing_model)
 
         log.debug(f"Updated current weather entry ID {item_id} to retain={retain}.")
 
@@ -266,7 +267,9 @@ def vacuum_current_weather_json_responses(echo: bool = False):
     with SessionLocal() as session:
         repo = CurrentWeatherJSONCollectorRepository(session=session)
 
-        all_current_weather_items: list[CurrentWeatherJSONCollectorModel] = repo.list() or []
+        all_current_weather_items: list[CurrentWeatherJSONCollectorModel] = (
+            repo.list() or []
+        )
 
         if not all_current_weather_items:
             log.warning("No current weather items found in database, skipping vacuum.")
