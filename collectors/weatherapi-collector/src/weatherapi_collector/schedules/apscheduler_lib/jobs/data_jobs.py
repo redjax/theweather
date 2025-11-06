@@ -58,7 +58,7 @@ async def _post_current_weather(db_echo: bool = False):
 
             try:
                 res: httpx.Response = http.send_request(req)
-                res.raise_for_status()
+                # res.raise_for_status()
 
                 if res.status_code not in [200, 201]:
                     if res.status_code == 409:
