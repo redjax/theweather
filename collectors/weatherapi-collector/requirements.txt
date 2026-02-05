@@ -28,7 +28,7 @@ loguru==0.7.3
     # via weatherapi-collector (collectors/weatherapi-collector/pyproject.toml)
 nexus-rpc==1.1.0
     # via temporalio
-protobuf==6.32.1
+protobuf==6.33.5
     # via temporalio
 schedule==1.2.2
     # via weatherapi-collector (collectors/weatherapi-collector/pyproject.toml)
