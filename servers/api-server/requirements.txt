@@ -30,7 +30,7 @@ pydantic-core==2.33.2
     # via pydantic
 pymysql==1.1.2
     # via api-server (servers/api-server/pyproject.toml)
-python-dotenv==1.1.1
+python-dotenv==1.2.2
     # via uvicorn
 python-multipart==0.0.20
     # via api-server (servers/api-server/pyproject.toml)
